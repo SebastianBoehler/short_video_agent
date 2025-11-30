@@ -1,0 +1,4 @@
+replicate
+python-dotenv
+moviepy
+requests
