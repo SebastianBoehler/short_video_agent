@@ -54,6 +54,25 @@ def generate_image(prompt):
         )
     return retry_replicate_call(call_replicate)
 
+def generate_video_with_image(prompt, image_path, duration, generate_audio=True):
+    def call_replicate():
+        # Open file as binary for Replicate upload
+        with open(image_path, 'rb') as image_file:
+            input_data = {
+                "prompt": prompt,
+                "image": image_file,
+                "duration": duration,
+                "resolution": "720p",
+                "aspect_ratio": "9:16",
+                "generate_audio": generate_audio
+            }
+            print(f"Generating video with image input: {input_data}")
+            return client.run(
+                "google/veo-3.1-fast",
+                input=input_data
+            )
+    return retry_replicate_call(call_replicate)
+
 def remove_background(input_video):
     def call_replicate():
         # Open file as binary for Replicate upload

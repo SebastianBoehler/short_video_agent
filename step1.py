@@ -1,6 +1,8 @@
-import replicate
 import os
+import cv2
 from dotenv import load_dotenv
+from replicate_client import generate_video_with_image
+from utils import extract_last_frame
 
 # Load environment variables from .env file
 load_dotenv()
@@ -14,6 +16,9 @@ def generate_speaker_video(speaker_image_path, prompt, output_filename="step1.mp
         prompt (str): Text prompt describing the speaker action/scene
         output_filename (str): Output video filename
         duration (int): Video duration in seconds
+    
+    Returns:
+        tuple: (video_filename, frame_filename) - paths to generated video and extracted frame
     """
     
     # Check if speaker image exists
@@ -24,27 +29,25 @@ def generate_speaker_video(speaker_image_path, prompt, output_filename="step1.mp
     print(f"Prompt: {prompt}")
     
     try:
-        # Open and read the speaker image
-        with open(speaker_image_path, "rb") as image_file:
-            # Generate video using Veo model
-            output = replicate.run(
-                "google/veo-3.1-fast",
-                input={
-                    "image": image_file,
-                    "prompt": prompt,
-                    "duration": duration,
-                    "resolution": "720p",
-                    "aspect_ratio": "9:16",
-                    "generate_audio": False  # We'll add audio later
-                }
-            )
+        # Generate video using the replicate_client module
+        output = generate_video_with_image(
+            prompt=prompt,
+            image_path=speaker_image_path,
+            duration=duration,
+            generate_audio=False
+        )
         
         # Save the generated video
         with open(output_filename, "wb") as video_file:
             video_file.write(output.read())
         
         print(f"✅ Speaker video saved as: {output_filename}")
-        return output_filename
+        
+        # Extract the last frame for use as start frame in next scene
+        frame_filename = output_filename.replace('.mp4', '_final_frame.png')
+        extract_last_frame(output_filename, frame_filename)
+        
+        return output_filename, frame_filename
         
     except Exception as e:
         print(f"❌ Error generating video: {str(e)}")
@@ -52,7 +55,7 @@ def generate_speaker_video(speaker_image_path, prompt, output_filename="step1.mp
 
 if __name__ == "__main__":
     # Configuration
-    SPEAKER_IMAGE = "speakers/speaker1.png"
+    SPEAKER_IMAGE = "speakers/speaker3.png"
     OUTPUT_VIDEO = "step1.mp4"
     
     # Prompt for speaker video with green screen background
@@ -64,13 +67,15 @@ if __name__ == "__main__":
     
     # Generate the speaker video
     try:
-        result = generate_speaker_video(
+        video_result, frame_result = generate_speaker_video(
             speaker_image_path=SPEAKER_IMAGE,
             prompt=SPEAKER_PROMPT,
             output_filename=OUTPUT_VIDEO,
             duration=8
         )
-        print(f"🎉 Step 1 completed successfully! Generated: {result}")
+        print(f"🎉 Step 1 completed successfully!")
+        print(f"📹 Generated video: {video_result}")
+        print(f"🖼️ Extracted final frame: {frame_result}")
         
     except Exception as e:
         print(f"💥 Step 1 failed: {e}")
