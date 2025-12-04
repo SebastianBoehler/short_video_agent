@@ -1,0 +1,140 @@
+# Short Video - TikTok Story/Proof Style
+# =======================================
+# Engaging TikTok-style storytelling with proof/results
+# POV format, before/after, transformation stories
+# Uses LTX-Video for cheap background generation
+
+title: "TikTok Story Proof"
+aspect_ratio: "9:16"
+resolution: "720p"
+
+# Use Wan 2.5 I2V - cheap with audio support (durations: 5 or 10s only)
+video_model: "wan-2.5-i2v"
+image_model: "flux-2-pro"
+
+scenes:
+  # Scene 1: Hook - POV attention grabber
+  # Duration: 5s = 11-14 words recommended (Wan requires 5 or 10s)
+  - id: "hook"
+    type: "speaker"
+    duration_s: 5
+
+    script: "POV: You finally found the thing that actually works. Let me explain."
+    # 12 words ^
+
+    video_prompt: >
+      Young person talking directly to camera with excited expression,
+      green screen background, phone selfie style, close up face,
+      TikTok creator vibe, authentic casual energy, vertical 9:16,
+      close-mic voiceover audio, clear speech, no room echo
+
+    speaker_image: "speakers/speaker1.png"
+
+    overlay_scale: 0.40
+    overlay_position: "bottom_center"
+
+    background_prompt: >
+      Aesthetic bedroom with soft lighting, cozy vibes,
+      morning sunlight through curtains, lifestyle aesthetic,
+      clean modern room, vertical 9:16 format
+
+  # Scene 2: The Problem - relatable struggle
+  # Duration: 5s = 11-14 words recommended
+  - id: "problem"
+    type: "speaker"
+    duration_s: 5
+
+    script: "I tried everything for months. Nothing worked. I was about to give up."
+    # 13 words ^
+
+    video_prompt: >
+      Same person with frustrated expression, shaking head,
+      green screen background, authentic emotion,
+      storytelling mode, vertical 9:16 format,
+      close-mic voiceover audio, clear speech, no room echo
+
+    speaker_image: "speakers/speaker1.png"
+
+    overlay_scale: 0.35
+    overlay_position: "bottom_right"
+
+    background_prompt: >
+      Messy desk with scattered products, stressed aesthetic,
+      dim lighting, chaotic but relatable scene,
+      before transformation vibes, vertical 9:16 format
+
+  # Scene 3: The Discovery - turning point
+  # Duration: 5s = 11-14 words recommended
+  - id: "discovery"
+    type: "speaker"
+    duration_s: 5
+
+    script: "Then I found this. And honestly? It changed everything in just two weeks."
+    # 13 words ^
+
+    video_prompt: >
+      Same person with hopeful expression, holding up product,
+      green screen background, lighting up with excitement,
+      transformation moment, vertical 9:16 format,
+      close-mic voiceover audio, clear speech, no room echo
+
+    speaker_image: "speakers/speaker1.png"
+
+    # product_image: "products/your_product/main.png"
+    background_prompt: >
+      Product hero shot with soft glow effect,
+      clean aesthetic, premium feel, spotlight lighting,
+      product reveal moment, vertical 9:16 format
+
+    overlay_scale: 0.30
+    overlay_position: "bottom_left"
+
+  # Scene 4: The Proof - show results
+  # Duration: 5s = 11-14 words recommended
+  - id: "proof"
+    type: "speaker"
+    duration_s: 5
+
+    script: "Look at the difference! Before and after. The results speak for themselves."
+    # 12 words ^
+
+    video_prompt: >
+      Same person showing before/after comparison, proud expression,
+      green screen background, pointing at results,
+      proof moment, vertical 9:16 format,
+      close-mic voiceover audio, clear speech, no room echo
+
+    speaker_image: "speakers/speaker1.png"
+
+    background_prompt: >
+      Split screen before/after comparison aesthetic,
+      dramatic transformation, clean modern design,
+      results showcase, vertical 9:16 format
+
+    overlay_scale: 0.35
+    overlay_position: "top_right"
+
+  # Scene 5: CTA - urgency and action
+  # Duration: 5s = 11-14 words recommended (Wan requires 5 or 10s)
+  - id: "cta"
+    type: "speaker"
+    duration_s: 5
+
+    script: "Link in bio! Trust me, you really need this in your life."
+    # 13 words ^
+
+    video_prompt: >
+      Same person pointing at camera, urgent but friendly,
+      green screen background, call to action energy,
+      TikTok CTA style, vertical 9:16 format,
+      close-mic voiceover audio, clear speech, no room echo
+
+    speaker_image: "speakers/speaker1.png"
+
+    overlay_scale: 0.50
+    overlay_position: "center"
+
+    background_prompt: >
+      Gradient background with subtle sparkle effects,
+      premium feel, CTA aesthetic, clean modern look,
+      action moment, vertical 9:16 format

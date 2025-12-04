@@ -108,6 +108,23 @@ MODEL_REGISTRY: dict[str, ModelConfig] = {
         description="FLUX 1.1 Pro - fast, cheaper image generation"
     ),
     
+    # Z-Image Turbo - ultra fast image generation
+    "z-image-turbo": ModelConfig(
+        name="z-image-turbo",
+        model_id="prunaai/z-image-turbo",
+        model_type=ModelType.TEXT_TO_IMAGE,
+        default_params={
+            "width": 768,
+            "height": 1344,  # 9:16 vertical
+            "output_format": "png",
+            "guidance_scale": 0,
+            "output_quality": 94,
+            "num_inference_steps": 22,
+        },
+        cost_tier="cheap",
+        description="Z-Image Turbo - ultra fast image generation (~$0.001/run)"
+    ),
+    
     # Video matting models
     "robust-video-matting": ModelConfig(
         name="robust-video-matting",
@@ -149,10 +166,70 @@ MODEL_REGISTRY: dict[str, ModelConfig] = {
         cost_tier="standard",
         description="MiniMax Voice Cloning - clone voice from 10s-5min audio ($3/voice)"
     ),
+    
+    # LTX-Video - cheap text-to-video model
+    "ltx-video-replicate": ModelConfig(
+        name="ltx-video-replicate",
+        model_id="lightricks/ltx-video:8c47da666861d081eeb4d1261853087de23923a268a69b63febdf5dc1dee08e4",
+        model_type=ModelType.TEXT_TO_VIDEO,
+        default_params={
+            "cfg": 3,
+            "model": "0.9.1",
+            "steps": 30,
+            "length": 97,  # ~4 seconds at 24fps
+            "target_size": 640,
+            "aspect_ratio": "9:16",
+            "negative_prompt": "low quality, worst quality, deformed, distorted, watermark",
+            "image_noise_scale": 0.15,
+        },
+        supports_start_frame=False,
+        supports_end_frame=False,
+        supports_audio=False,
+        cost_tier="cheap",
+        description="LTX-Video via Replicate - fast, cheap text-to-video (~$0.02/run)"
+    ),
+    
+    # Wan 2.5 Image-to-Video - cheap with audio support
+    # Valid durations: 5 or 10 seconds only
+    "wan-2.5-i2v": ModelConfig(
+        name="wan-2.5-i2v",
+        model_id="wan-video/wan-2.5-i2v",
+        model_type=ModelType.IMAGE_TO_VIDEO,
+        default_params={
+            "duration": 5,
+            "resolution": "720p",
+            "negative_prompt": "",
+            "enable_prompt_expansion": True,
+        },
+        supports_start_frame=True,
+        supports_end_frame=False,
+        supports_audio=True,
+        cost_tier="cheap",
+        description="Wan 2.5 I2V - cheap image-to-video with audio, durations: 5 or 10s (~$0.05/run)"
+    ),
+    
+    # Wan 2.5 Text-to-Video - text-to-video without image input
+    # Valid durations: 5 or 10 seconds only
+    "wan-2.5-t2v": ModelConfig(
+        name="wan-2.5-t2v",
+        model_id="wan-video/wan-2.5-t2v",
+        model_type=ModelType.TEXT_TO_VIDEO,
+        default_params={
+            "size": "720*1280",  # 9:16 vertical (width*height)
+            "duration": 5,
+            "negative_prompt": "",
+            "enable_prompt_expansion": True,
+        },
+        supports_start_frame=False,
+        supports_end_frame=False,
+        supports_audio=True,
+        cost_tier="cheap",
+        description="Wan 2.5 T2V - text-to-video with audio, durations: 5 or 10s (~$0.05/run)"
+    ),
 }
 
 # Default models for each task
-DEFAULT_VIDEO_MODEL = "veo-3.1-fast"
+DEFAULT_VIDEO_MODEL = "wan-2.5-i2v"
 DEFAULT_IMAGE_MODEL = "flux-2-pro"
 DEFAULT_MATTING_MODEL = "robust-video-matting"
 DEFAULT_TTS_MODEL = "speech-02-hd"
@@ -207,12 +284,36 @@ def retry_replicate_call(func, max_retries=3, delay=1):
             time.sleep(wait)
 
 
-def _prepare_file_input(path: Union[str, Path]) -> object:
-    """Prepare a file for upload to Replicate."""
+def _prepare_file_input(path: Union[str, Path]) -> str:
+    """Prepare a file for upload to Replicate as a data URI."""
+    import base64
+    import mimetypes
+    
     path = Path(path)
     if not path.exists():
         raise FileNotFoundError(f"File not found: {path}")
-    return open(path, 'rb')
+    
+    # Determine MIME type
+    mime_type, _ = mimetypes.guess_type(str(path))
+    if mime_type is None:
+        # Default based on extension
+        ext = path.suffix.lower()
+        mime_map = {
+            '.png': 'image/png',
+            '.jpg': 'image/jpeg',
+            '.jpeg': 'image/jpeg',
+            '.webp': 'image/webp',
+            '.mp4': 'video/mp4',
+            '.mp3': 'audio/mpeg',
+            '.wav': 'audio/wav',
+        }
+        mime_type = mime_map.get(ext, 'application/octet-stream')
+    
+    # Read and encode as base64 data URI
+    with open(path, 'rb') as f:
+        data = base64.b64encode(f.read()).decode('utf-8')
+    
+    return f"data:{mime_type};base64,{data}"
 
 
 # =============================================================================
@@ -225,10 +326,10 @@ def generate_video(
     generate_audio: bool = True,
     aspect_ratio: str = "9:16",
     resolution: str = "720p",
-    model: str = DEFAULT_VIDEO_MODEL,
+    model: str = "wan-2.5-t2v",  # Default to T2V model for text-to-video
 ) -> object:
     """
-    Generate a video from a text prompt.
+    Generate a video from a text prompt (no image input).
     
     Args:
         prompt: Text description of the video
@@ -242,6 +343,23 @@ def generate_video(
         Replicate output object (use .read() for bytes, .url() for URL)
     """
     model_config = get_model(model)
+    
+    # Handle LTX-Video model
+    if model == "ltx-video-replicate":
+        return generate_video_ltx(
+            prompt=prompt,
+            duration=duration,
+            aspect_ratio=aspect_ratio,
+            model=model,
+        )
+    
+    # Handle Wan T2V model
+    if model == "wan-2.5-t2v":
+        return generate_video_wan_t2v(
+            prompt=prompt,
+            duration=duration,
+            aspect_ratio=aspect_ratio,
+        )
     
     def call_replicate():
         input_data = {
@@ -257,6 +375,107 @@ def generate_video(
         print(f"🎬 Generating video with {model_config.name}")
         print(f"   Prompt: {prompt[:100]}...")
         return client.run(model_config.model_id, input=input_data)
+    
+    return retry_replicate_call(call_replicate)
+
+
+def generate_video_wan_t2v(
+    prompt: str,
+    duration: int = 5,
+    aspect_ratio: str = "9:16",
+) -> object:
+    """
+    Generate a video using Wan 2.5 T2V model (text-to-video with audio).
+    
+    Args:
+        prompt: Text description of the video
+        duration: Video duration in seconds (5 or 10)
+        aspect_ratio: Video aspect ratio (e.g., "9:16", "16:9", "1:1")
+    
+    Returns:
+        Replicate output object
+    """
+    model_config = get_model("wan-2.5-t2v")
+    
+    # Clamp duration to valid values (5 or 10)
+    duration = 5 if duration <= 7 else 10
+    
+    # Convert aspect ratio to size format (width*height)
+    size_map = {
+        "9:16": "720*1280",
+        "16:9": "1280*720",
+        "1:1": "720*720",
+    }
+    size = size_map.get(aspect_ratio, "720*1280")
+    
+    def call_replicate():
+        input_data = {
+            **model_config.default_params,
+            "prompt": prompt,
+            "duration": duration,
+            "size": size,
+        }
+            
+        print(f"🎬 Generating video with {model_config.name} (T2V)")
+        print(f"   Prompt: {prompt[:100]}...")
+        print(f"   Duration: {duration}s, Size: {size}")
+        
+        return client.run(model_config.model_id, input=input_data)
+    
+    return retry_replicate_call(call_replicate)
+
+
+def generate_video_ltx(
+    prompt: str,
+    duration: int = 4,
+    aspect_ratio: str = "9:16",
+    model: str = "ltx-video-replicate",
+    cfg: float = 3.0,
+    steps: int = 30,
+    target_size: int = 640,
+) -> object:
+    """
+    Generate a video using LTX-Video model (cheap, fast text-to-video).
+    
+    Args:
+        prompt: Text description of the video
+        duration: Video duration in seconds (max ~4s per run)
+        aspect_ratio: Video aspect ratio (e.g., "9:16", "16:9", "1:1")
+        model: Model name from registry
+        cfg: Classifier-free guidance scale
+        steps: Number of inference steps
+        target_size: Target size for the video
+    
+    Returns:
+        Replicate output object (use .read() for bytes, .url() for URL)
+    """
+    model_config = get_model(model)
+    
+    # Convert duration to frame length (24fps)
+    # LTX-Video uses 'length' parameter for frame count
+    frame_length = min(duration * 24, 97)  # Max 97 frames (~4s)
+    
+    def call_replicate():
+        input_data = {
+            **model_config.default_params,
+            "prompt": prompt,
+            "length": frame_length,
+            "aspect_ratio": aspect_ratio,
+            "cfg": cfg,
+            "steps": steps,
+            "target_size": target_size,
+        }
+            
+        print(f"🎬 Generating video with {model_config.name} (cheap mode)")
+        print(f"   Prompt: {prompt[:100]}...")
+        print(f"   Frames: {frame_length} (~{frame_length/24:.1f}s)")
+        
+        output = client.run(model_config.model_id, input=input_data)
+        
+        # LTX-Video returns a list, get first element
+        if isinstance(output, list) and len(output) > 0:
+            return output[0]
+        return output
     
     return retry_replicate_call(call_replicate)
 
@@ -296,8 +515,8 @@ def generate_video_with_image(
         raise ValueError(f"Model {model} does not support end frame input")
     
     def call_replicate():
-        # Handle image input - URL or file path
-        if isinstance(image, str) and image.startswith(('http://', 'https://')):
+        # Handle image input - URL or file path (convert to data URI)
+        if isinstance(image, str) and image.startswith(('http://', 'https://', 'data:')):
             image_input = image
         else:
             image_input = _prepare_file_input(image)
@@ -305,39 +524,36 @@ def generate_video_with_image(
         # Handle last_frame input
         last_frame_input = None
         if last_frame:
-            if isinstance(last_frame, str) and last_frame.startswith(('http://', 'https://')):
+            if isinstance(last_frame, str) and last_frame.startswith(('http://', 'https://', 'data:')):
                 last_frame_input = last_frame
             else:
                 last_frame_input = _prepare_file_input(last_frame)
         
-        try:
-            input_data = {
-                **model_config.default_params,
-                "prompt": prompt,
-                "image": image_input,
-                "duration": duration,
-                "aspect_ratio": aspect_ratio,
-                "resolution": resolution,
-            }
-            
+        input_data = {
+            **model_config.default_params,
+            "prompt": prompt,
+            "image": image_input,
+            "duration": duration,
+        }
+        
+        # Only add aspect_ratio and resolution for models that support them
+        # Wan 2.5 I2V doesn't use aspect_ratio (derives from image)
+        if model_config.name.startswith("veo"):
+            input_data["aspect_ratio"] = aspect_ratio
+            input_data["resolution"] = resolution
             if model_config.supports_audio:
                 input_data["generate_audio"] = generate_audio
-            
-            if last_frame_input:
-                input_data["last_frame"] = last_frame_input
-            
-            print(f"🎬 Generating video with {model_config.name} (start frame)")
-            print(f"   Prompt: {prompt[:100]}...")
-            if last_frame:
-                print(f"   With end frame constraint")
-            
-            return client.run(model_config.model_id, input=input_data)
-        finally:
-            # Close file handles if we opened them
-            if hasattr(image_input, 'close'):
-                image_input.close()
-            if last_frame_input and hasattr(last_frame_input, 'close'):
-                last_frame_input.close()
+        
+        if last_frame_input:
+            input_data["last_frame"] = last_frame_input
+        
+        print(f"🎬 Generating video with {model_config.name} (start frame)")
+        print(f"   Prompt: {prompt[:100]}...")
+        print(f"   Image: {image[:50] if isinstance(image, str) else 'file'}")
+        if last_frame:
+            print(f"   With end frame constraint")
+        
+        return client.run(model_config.model_id, input=input_data)
     
     return retry_replicate_call(call_replicate)
 
@@ -369,15 +585,31 @@ def generate_image(
     model_config = get_model(model)
     
     def call_replicate():
-        input_data = {
-            **model_config.default_params,
-            "prompt": prompt,
-            "aspect_ratio": aspect_ratio,
-            "output_format": output_format,
-        }
-        # Only add resolution if model supports it
-        if "resolution" in model_config.default_params:
-            input_data["resolution"] = resolution
+        # Z-Image Turbo uses width/height instead of aspect_ratio
+        if model == "z-image-turbo":
+            # Convert aspect ratio to width/height
+            size_map = {
+                "9:16": (768, 1344),
+                "16:9": (1344, 768),
+                "1:1": (1024, 1024),
+            }
+            width, height = size_map.get(aspect_ratio, (768, 1344))
+            input_data = {
+                **model_config.default_params,
+                "prompt": prompt,
+                "width": width,
+                "height": height,
+            }
+        else:
+            input_data = {
+                **model_config.default_params,
+                "prompt": prompt,
+                "aspect_ratio": aspect_ratio,
+                "output_format": output_format,
+            }
+            # Only add resolution if model supports it
+            if "resolution" in model_config.default_params:
+                input_data["resolution"] = resolution
             
         print(f"🖼️ Generating image with {model_config.name}")
         print(f"   Prompt: {prompt[:100]}...")

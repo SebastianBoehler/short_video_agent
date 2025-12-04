@@ -257,9 +257,19 @@ def process_scene(
                 model=scene.video_model,
             )
         else:
-            print(f"   Generating background video...")
-            bg_output = generate_video(
+            # For I2V models without a product image, generate an image first then animate
+            print(f"   Generating background image first...")
+            bg_image_output = generate_image(
                 prompt=scene.background_prompt,
+                model=scene.image_model,
+            )
+            bg_image_path = scene_dir / f"{scene.id}_background_frame.png"
+            save_output(bg_image_output, bg_image_path)
+            
+            print(f"   Animating background image...")
+            bg_output = generate_video_with_image(
+                prompt=scene.background_prompt,
+                image=str(bg_image_path),
                 duration=int(scene.duration_s),
                 generate_audio=False,
                 model=scene.video_model,
