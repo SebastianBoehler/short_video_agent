@@ -4,3 +4,10 @@ moviepy
 requests
 pyyaml
 opencv-python
+
+# LTX-Video (self-hosted) - uncomment for GPU deployment
+diffusers>=0.32.0
+transformers>=4.45.0
+accelerate>=0.34.0
+torch>=2.1.0
+sentencepiece  # For T5 tokenizer

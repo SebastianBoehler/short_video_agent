@@ -1,0 +1,144 @@
+# Short Video - Paris Painting Art Ad
+# ====================================
+# TikTok influencer style ad for an oil painting of a Paris cafe
+# Product: Art print/painting sold in online shop
+# Speaker: speaker4
+
+title: "Paris Painting Ad"
+aspect_ratio: "9:16"
+resolution: "720p"
+
+# Use Wan 2.5 I2V - cheap with audio support (durations: 5 or 10s only)
+video_model: "wan-2.5-i2v"
+image_model: "flux-2-pro"
+
+scenes:
+  # Scene 1: Hook - attention grabber
+  # Duration: 5s = 11-14 words recommended
+  - id: "hook"
+    type: "speaker"
+    duration_s: 5
+
+    script: "Wait, you need to see this painting. It literally transformed my entire living room."
+    # 14 words ^
+
+    video_prompt: >
+      Young woman influencer talking directly to camera with excited expression,
+      green screen background, ring light, perfect lip sync to speech,
+      speaking English clearly, mouth movements match audio perfectly,
+      TikTok creator aesthetic, authentic energy, vertical 9:16 format,
+      close-mic voiceover audio, clear English speech, no room echo
+
+    speaker_image: "speakers/speaker4.png"
+
+    overlay_scale: 0.40
+    overlay_position: "bottom_center"
+
+    background_prompt: >
+      Elegant modern living room with white walls, minimalist decor,
+      soft natural lighting, cozy aesthetic, lifestyle influencer style,
+      clean museum-like wall space, vertical 9:16 format
+
+  # Scene 2: Product Reveal - show the painting
+  # Duration: 5s = 11-14 words recommended
+  - id: "reveal"
+    type: "speaker"
+    duration_s: 5
+
+    script: "This gorgeous oil painting of a Paris cafe. Look at those colors and details!"
+    # 13 words ^
+
+    video_prompt: >
+      Same woman showing painting with admiration, gesturing towards art,
+      green screen background, soft lighting, perfect lip sync,
+      speaking English, mouth movements synchronized with speech,
+      art appreciation moment, vertical 9:16 format,
+      close-mic voiceover audio, clear English speech, no room echo
+
+    speaker_image: "speakers/speaker4.png"
+
+    # product_image: "products/painting/paris_cafe.png"
+    background_prompt: >
+      Beautiful oil painting of a cozy Paris cafe scene hanging on clean white museum wall,
+      impressionist style, warm colors, golden frame, gallery lighting,
+      elegant art display, vertical 9:16 format
+
+    overlay_scale: 0.30
+    overlay_position: "bottom_left"
+
+  # Scene 3: Lifestyle - painting in context
+  # Duration: 5s = 11-14 words recommended
+  - id: "lifestyle"
+    type: "speaker"
+    duration_s: 5
+
+    script: "It brings that Parisian vibe right into your home. So romantic and elegant."
+    # 13 words ^
+
+    video_prompt: >
+      Same woman with dreamy expression, describing the feeling,
+      green screen background, warm lighting, perfect lip sync to English speech,
+      mouth movements match audio, lifestyle content style, vertical 9:16 format,
+      close-mic voiceover audio, clear English speech, no room echo
+
+    speaker_image: "speakers/speaker4.png"
+
+    background_prompt: >
+      Paris cafe oil painting displayed in beautiful modern apartment,
+      morning coffee scene, cozy reading nook, French aesthetic,
+      lifestyle photography style, vertical 9:16 format
+
+    overlay_scale: 0.35
+    overlay_position: "top_right"
+
+  # Scene 4: Quality & Value
+  # Duration: 5s = 11-14 words recommended
+  - id: "quality"
+    type: "speaker"
+    duration_s: 5
+
+    script: "Museum quality print on premium canvas. And the price? Surprisingly affordable."
+    # 11 words ^
+
+    video_prompt: >
+      Same woman with impressed expression, emphasizing quality,
+      green screen background, professional lighting, perfect lip sync,
+      speaking English clearly, synchronized mouth movements,
+      product review style, vertical 9:16 format,
+      close-mic voiceover audio, clear English speech, no room echo
+
+    speaker_image: "speakers/speaker4.png"
+
+    background_prompt: >
+      Close-up of canvas texture, brush strokes visible,
+      premium art quality, gallery presentation,
+      luxury product photography, vertical 9:16 format
+
+    overlay_scale: 0.30
+    overlay_position: "bottom_right"
+
+  # Scene 5: CTA - drive action
+  # Duration: 5s = 11-14 words recommended
+  - id: "cta"
+    type: "speaker"
+    duration_s: 5
+
+    script: "Link in bio to shop! Trust me, your walls will thank you."
+    # 12 words ^
+
+    video_prompt: >
+      Same woman pointing at camera, urgent but friendly call to action,
+      green screen background, bright energy, perfect lip sync to English,
+      mouth movements perfectly synchronized with speech,
+      TikTok CTA style, vertical 9:16 format,
+      close-mic voiceover audio, clear English speech, no room echo
+
+    speaker_image: "speakers/speaker4.png"
+
+    overlay_scale: 0.50
+    overlay_position: "center"
+
+    background_prompt: >
+      Paris cafe painting with shop now aesthetic,
+      elegant product display, premium art brand feel,
+      call to action moment, vertical 9:16 format

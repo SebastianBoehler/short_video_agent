@@ -1,0 +1,139 @@
+# Short Video - Serious News/Media Report Style
+# ==============================================
+# Professional news anchor / journalist reporting style
+# Authoritative, credible, fact-based presentation
+# Suitable for: tech news, industry updates, serious topics
+
+title: "News Media Report"
+aspect_ratio: "9:16"
+resolution: "720p"
+
+# Use Wan 2.5 I2V - cheap with audio support (durations: 5 or 10s only)
+video_model: "wan-2.5-i2v"
+image_model: "flux-2-pro"
+
+scenes:
+  # Scene 1: Breaking News Intro
+  # Duration: 5s = 11-14 words recommended
+  - id: "breaking"
+    type: "speaker"
+    duration_s: 5
+
+    script: "Breaking news tonight. A major development that could change the entire industry."
+    # 12 words ^
+
+    video_prompt: >
+      Professional news anchor in formal attire, serious expression,
+      green screen background, studio lighting, authoritative presence,
+      news broadcast style, direct eye contact, vertical 9:16 format,
+      close-mic voiceover audio, clear speech, no room echo
+
+    speaker_image: "speakers/speaker3.png"
+
+    overlay_scale: 0.35
+    overlay_position: "bottom_right"
+
+    background_prompt: >
+      Professional news studio background, blue and red accents,
+      breaking news graphics, world map display,
+      broadcast quality, vertical 9:16 format
+
+  # Scene 2: The Story - what happened
+  # Duration: 5s = 11-14 words recommended (Wan requires 5 or 10s)
+  - id: "story"
+    type: "speaker"
+    duration_s: 5
+
+    script: "Sources confirm the company has announced groundbreaking new technology. Here's what we know."
+    # 13 words ^
+
+    video_prompt: >
+      Same news anchor explaining with professional gestures,
+      green screen background, engaged but serious,
+      investigative journalism style, vertical 9:16 format,
+      close-mic voiceover audio, clear speech, no room echo
+
+    speaker_image: "speakers/speaker3.png"
+
+    overlay_scale: 0.30
+    overlay_position: "bottom_left"
+
+    background_prompt: >
+      Corporate headquarters building, tech company aesthetic,
+      news footage style, professional documentation,
+      story context, vertical 9:16 format
+
+  # Scene 3: Expert Analysis - deeper insight
+  # Duration: 5s = 11-14 words recommended (Wan requires 5 or 10s)
+  - id: "analysis"
+    type: "speaker"
+    duration_s: 5
+
+    script: "Industry experts say this could disrupt the market. The implications are huge."
+    # 13 words ^
+
+    video_prompt: >
+      Same anchor with analytical expression, thoughtful delivery,
+      green screen background, expert commentary mode,
+      in-depth analysis style, vertical 9:16 format,
+      close-mic voiceover audio, clear speech, no room echo
+
+    speaker_image: "speakers/speaker3.png"
+
+    overlay_scale: 0.30
+    overlay_position: "top_right"
+
+    background_prompt: >
+      Data visualization, charts and graphs,
+      market analysis aesthetic, professional infographics,
+      expert analysis context, vertical 9:16 format
+
+  # Scene 4: Impact - what it means
+  # Duration: 5s = 11-14 words recommended
+  - id: "impact"
+    type: "speaker"
+    duration_s: 5
+
+    script: "For consumers, this means better products at lower prices. A win for everyone."
+    # 13 words ^
+
+    video_prompt: >
+      Same anchor with hopeful but measured expression,
+      green screen background, balanced reporting,
+      impact assessment style, vertical 9:16 format,
+      close-mic voiceover audio, clear speech, no room echo
+
+    speaker_image: "speakers/speaker3.png"
+
+    overlay_scale: 0.35
+    overlay_position: "bottom_center"
+
+    background_prompt: >
+      Happy consumers, positive market reaction,
+      success story aesthetic, optimistic outlook,
+      impact visualization, vertical 9:16 format
+
+  # Scene 5: Sign-off - professional close
+  # Duration: 5s = 11-14 words recommended (Wan requires 5 or 10s)
+  - id: "signoff"
+    type: "speaker"
+    duration_s: 5
+
+    script: "We'll continue to follow this story closely. Stay informed with us here."
+    # 12 words ^
+
+    video_prompt: >
+      Same anchor with professional sign-off expression,
+      green screen background, closing statement energy,
+      news broadcast ending, vertical 9:16 format,
+      close-mic voiceover audio, clear speech, no room echo
+
+    speaker_image: "speakers/speaker3.png"
+
+    overlay_scale: 0.40
+    overlay_position: "center"
+
+    background_prompt: >
+      News studio with logo, professional broadcast ending,
+      subscribe/follow graphics, channel branding,
+      sign-off moment, vertical 9:16 format

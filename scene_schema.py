@@ -53,7 +53,7 @@ class SceneConfig:
     background_music: Optional[str] = None  # Path to background music
     
     # Models to use (override defaults)
-    video_model: str = "veo-3.1-fast"
+    video_model: str = "wan-2.5-i2v"
     image_model: str = "flux-2-pro"
     tts_model: str = "speech-02-hd"
     
@@ -100,7 +100,7 @@ class AdConfig:
     voice_clone_source: Optional[str] = None  # Path to audio for voice cloning
     
     # Global model defaults
-    video_model: str = "veo-3.1-fast"
+    video_model: str = "wan-2.5-i2v"
     image_model: str = "flux-2-pro"
     tts_model: str = "speech-02-hd"
     
@@ -159,35 +159,74 @@ class AdConfig:
 # Loading Functions
 # =============================================================================
 
-def load_scene_config(data: dict) -> SceneConfig:
-    """Load a SceneConfig from a dictionary."""
+def _resolve_path(path: Optional[str], base_dir: Optional[Path] = None) -> Optional[str]:
+    """Resolve a relative path to absolute, checking if file exists."""
+    if not path:
+        return None
+    
+    p = Path(path)
+    
+    # Already absolute
+    if p.is_absolute():
+        return str(p) if p.exists() else None
+    
+    # Try relative to base_dir first
+    if base_dir:
+        resolved = base_dir / p
+        if resolved.exists():
+            return str(resolved.resolve())
+    
+    # Try relative to current working directory
+    if p.exists():
+        return str(p.resolve())
+    
+    return None
+
+
+def load_scene_config(
+    data: dict,
+    default_video_model: str = "wan-2.5-i2v",
+    default_image_model: str = "flux-2-pro",
+    default_tts_model: str = "speech-02-hd",
+    base_dir: Optional[Path] = None,
+) -> SceneConfig:
+    """Load a SceneConfig from a dictionary, inheriting global defaults."""
     return SceneConfig(
         id=data["id"],
         type=data["type"],
         duration_s=data["duration_s"],
         video_prompt=data["video_prompt"],
-        start_image=data.get("start_image"),
-        end_image=data.get("end_image"),
+        start_image=_resolve_path(data.get("start_image"), base_dir),
+        end_image=_resolve_path(data.get("end_image"), base_dir),
         script=data.get("script"),
-        speaker_image=data.get("speaker_image"),
+        speaker_image=_resolve_path(data.get("speaker_image"), base_dir),
         voice_id=data.get("voice_id"),
         emotion=data.get("emotion"),
-        product_image=data.get("product_image"),
-        background=data.get("background"),
+        product_image=_resolve_path(data.get("product_image"), base_dir),
+        background=_resolve_path(data.get("background"), base_dir),
         background_prompt=data.get("background_prompt"),
         overlay_position=data.get("overlay_position", "bottom_right"),
         overlay_scale=data.get("overlay_scale", 0.35),
         generate_video_audio=data.get("generate_video_audio", False),
-        background_music=data.get("background_music"),
-        video_model=data.get("video_model", "veo-3.1-fast"),
-        image_model=data.get("image_model", "flux-2-pro"),
-        tts_model=data.get("tts_model", "speech-02-hd"),
+        background_music=_resolve_path(data.get("background_music"), base_dir),
+        video_model=data.get("video_model", default_video_model),
+        image_model=data.get("image_model", default_image_model),
+        tts_model=data.get("tts_model", default_tts_model),
     )
 
 
-def load_ad_config(data: dict) -> AdConfig:
+def load_ad_config(data: dict, base_dir: Optional[Path] = None) -> AdConfig:
     """Load an AdConfig from a dictionary."""
-    scenes = [load_scene_config(s) for s in data.get("scenes", [])]
+    # Get global model defaults
+    global_video_model = data.get("video_model", "wan-2.5-i2v")
+    global_image_model = data.get("image_model", "flux-2-pro")
+    global_tts_model = data.get("tts_model", "speech-02-hd")
+    
+    # Load scenes with global defaults
+    scenes = [
+        load_scene_config(s, global_video_model, global_image_model, global_tts_model, base_dir) 
+        for s in data.get("scenes", [])
+    ]
     
     return AdConfig(
         title=data["title"],
@@ -196,7 +235,7 @@ def load_ad_config(data: dict) -> AdConfig:
         scenes=scenes,
         default_voice_id=data.get("default_voice_id"),
         voice_clone_source=data.get("voice_clone_source"),
-        video_model=data.get("video_model", "veo-3.1-fast"),
+        video_model=data.get("video_model", "wan-2.5-i2v"),
         image_model=data.get("image_model", "flux-2-pro"),
         tts_model=data.get("tts_model", "speech-02-hd"),
         brand_colors=data.get("brand_colors", []),
@@ -206,11 +245,13 @@ def load_ad_config(data: dict) -> AdConfig:
 
 def load_from_yaml(path: str | Path) -> AdConfig:
     """Load ad configuration from a YAML file."""
-    path = Path(path)
+    path = Path(path).resolve()
     with open(path) as f:
         data = yaml.safe_load(f)
     
-    config = load_ad_config(data)
+    # Use parent directory of YAML file as base for relative paths
+    # But also check current working directory
+    config = load_ad_config(data, base_dir=Path.cwd())
     errors = config.validate()
     
     if errors:
@@ -223,11 +264,12 @@ def load_from_yaml(path: str | Path) -> AdConfig:
 
 def load_from_json(path: str | Path) -> AdConfig:
     """Load ad configuration from a JSON file."""
-    path = Path(path)
+    path = Path(path).resolve()
     with open(path) as f:
         data = json.load(f)
     
-    config = load_ad_config(data)
+    # Use parent directory of JSON file as base for relative paths
+    config = load_ad_config(data, base_dir=Path.cwd())
     errors = config.validate()
     
     if errors:
