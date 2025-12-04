@@ -1,0 +1,114 @@
+# Short Video - News Report Style
+# ================================
+# Reporter delivers news about an AI tool, with dynamic backgrounds
+# Product images can be used to generate product-focused backgrounds
+
+title: "AI Tool News Report"
+aspect_ratio: "9:16"
+resolution: "720p"
+
+# Global model defaults
+video_model: "veo-3.1-fast"
+image_model: "flux-2-pro"
+
+# Product images (optional - used for background generation)
+# Place product images in: products/{product_name}/image1.png
+
+scenes:
+  # Scene 1: Breaking news intro
+  # Duration: 6s = 13-17 words recommended
+  - id: "intro"
+    type: "speaker"
+    duration_s: 6
+
+    script: "Breaking news! A new AI tool is changing how people work online. Here's what you need to know."
+    # 17 words ^
+
+    video_prompt: >
+      Professional female news reporter talking to camera,
+      green screen background, studio lighting, serious but friendly expression,
+      news anchor style, vertical 9:16 format,
+      close-mic voiceover audio, clear speech, no room echo
+
+    speaker_image: "speakers/speaker5.png"
+
+    # Optional: product_image: "products/ai_assistant/logo.png"
+
+    overlay_scale: 0.35
+    overlay_position: "bottom_right"
+
+    background_prompt: >
+      Abstract digital data visualization, flowing blue and purple particles,
+      futuristic tech interface, news broadcast style graphics,
+      smooth motion, vertical 9:16 format
+
+  # Scene 2: Explain the tool - show product interface
+  # Duration: 6s = 13-17 words recommended
+  - id: "explain"
+    type: "speaker"
+    duration_s: 6
+
+    script: "This AI assistant can write emails, create content, and automate tasks in just seconds."
+    # 14 words ^
+
+    video_prompt: >
+      Same female reporter explaining with hand gestures,
+      green screen background, engaged expression,
+      professional news style, vertical 9:16 format,
+      close-mic voiceover audio, clear speech, no room echo
+
+    speaker_image: "speakers/speaker5.png"
+
+    # Use product image for background (uncomment when you have product images)
+    # product_image: "products/ai_assistant/interface.png"
+    background_prompt: >
+      Futuristic AI interface with glowing neural network,
+      holographic displays showing text and documents,
+      smooth camera movement, vertical 9:16 format
+
+    overlay_scale: 0.30
+    overlay_position: "bottom_left"
+
+  # Scene 3: User testimonial angle
+  # Duration: 6s = 13-17 words recommended
+  - id: "benefits"
+    type: "speaker"
+    duration_s: 6
+
+    script: "Users report saving up to ten hours per week. Productivity has never been this easy!"
+    # 15 words ^
+
+    video_prompt: >
+      Same reporter with impressed expression, nodding,
+      green screen background, bright lighting,
+      enthusiastic delivery, vertical 9:16 format,
+      close-mic voiceover audio, clear speech, no room echo
+
+    speaker_image: "speakers/speaker5.png"
+
+    background_prompt: >
+      Happy person working on laptop in modern office,
+      productivity graphs rising, success aesthetic,
+      warm lighting, vertical 9:16 format
+
+    overlay_scale: 0.35
+    overlay_position: "top_right"
+
+  # Scene 4: Call to action
+  # Duration: 4s = 8-12 words recommended
+  - id: "cta"
+    type: "speaker"
+    duration_s: 4
+
+    script: "Try it free today! Link in the description below."
+    # 9 words ^
+
+    video_prompt: >
+      Same reporter, direct eye contact, pointing gesture,
+      green screen background, call to action energy, vertical 9:16,
+      close-mic voiceover audio, clear speech, no room echo
+
+    speaker_image: "speakers/speaker5.png"
+
+    overlay_scale: 0.45
+    overlay_position: "center"

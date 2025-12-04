@@ -2,3 +2,5 @@ replicate
 python-dotenv
 moviepy
 requests
+pyyaml
+opencv-python
