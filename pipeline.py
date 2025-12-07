@@ -16,9 +16,11 @@ from dataclasses import dataclass
 from scene_schema import load_config, AdConfig, SceneConfig
 from replicate_client import (
     generate_video_with_image,
+    generate_video_wan_t2v,
     generate_video,
     generate_image,
     remove_background,
+    add_captions,
     save_output,
 )
 from utils import extract_last_frame
@@ -74,12 +76,19 @@ def calculate_overlay_position(
     padding: int = 20,
 ) -> tuple[int, int]:
     """Calculate x, y position for overlay based on position string."""
+    center_x = (bg_width - overlay_width) // 2
+    center_y = (bg_height - overlay_height) // 2
+    
     positions = {
         "top_left": (padding, padding),
+        "top_center": (center_x, padding),
         "top_right": (bg_width - overlay_width - padding, padding),
+        "center_left": (padding, center_y),
+        "center": (center_x, center_y),
+        "center_right": (bg_width - overlay_width - padding, center_y),
         "bottom_left": (padding, bg_height - overlay_height - padding),
+        "bottom_center": (center_x, bg_height - overlay_height - padding),
         "bottom_right": (bg_width - overlay_width - padding, bg_height - overlay_height - padding),
-        "center": ((bg_width - overlay_width) // 2, (bg_height - overlay_height) // 2),
     }
     return positions.get(position, positions["bottom_right"])
 
@@ -91,10 +100,11 @@ def composite_speaker_on_background(
     output_video: str,
     scale: float = 0.35,
     position: str = "bottom_right",
+    mix_background_audio: bool = False,
 ) -> str:
     """
     Composite scaled speaker onto background using alpha mask.
-    Preserves audio from speaker video.
+    Preserves audio from speaker video. Optionally mixes background video audio.
     
     Args:
         speaker_video: Path to speaker video
@@ -103,6 +113,7 @@ def composite_speaker_on_background(
         output_video: Output path
         scale: Scale factor for speaker (0.35 = 35% of frame width)
         position: Position string (top_left, top_right, bottom_left, bottom_right, center)
+        mix_background_audio: Whether to mix background video audio with speaker audio
     """
     print(f"🎨 Compositing speaker onto background...")
     print(f"   Scale: {scale:.0%}, Position: {position}")
@@ -126,54 +137,109 @@ def composite_speaker_on_background(
     
     if is_image_bg:
         # For image background - loop it and composite
-        filter_complex = (
-            f'[0:v]scale={bg_width}:{bg_height},format=rgba[bg];'
-            f'[1:v]scale={speaker_width}:{speaker_height},format=rgba[fg_scaled];'
-            f'[2:v]scale={speaker_width}:{speaker_height},format=gray[alpha_scaled];'
-            f'[fg_scaled][alpha_scaled]alphamerge[masked];'
-            f'[bg][masked]overlay={pos_x}:{pos_y}:format=auto:shortest=1[out]'
-        )
-        cmd = [
-            'ffmpeg',
-            '-loop', '1',
-            '-i', background,
-            '-i', speaker_video,
-            '-i', alpha_mask,
-            '-filter_complex', filter_complex,
-            '-map', '[out]',
-            '-map', '1:a?',
-            '-c:v', 'libx264',
-            '-preset', 'fast',
-            '-crf', '23',
-            '-c:a', 'aac',
-            '-shortest',
-            '-y',
-            output_video
-        ]
+        if mix_background_audio:
+            # Image backgrounds have no audio, just use speaker audio
+            filter_complex = (
+                f'[0:v]scale={bg_width}:{bg_height},format=rgba[bg];'
+                f'[1:v]scale={speaker_width}:{speaker_height},format=rgba[fg_scaled];'
+                f'[2:v]scale={speaker_width}:{speaker_height},format=gray[alpha_scaled];'
+                f'[fg_scaled][alpha_scaled]alphamerge[masked];'
+                f'[bg][masked]overlay={pos_x}:{pos_y}:format=auto:shortest=1[out]'
+            )
+            cmd = [
+                'ffmpeg',
+                '-loop', '1',
+                '-i', background,
+                '-i', speaker_video,
+                '-i', alpha_mask,
+                '-filter_complex', filter_complex,
+                '-map', '[out]',
+                '-map', '1:a?',
+                '-c:v', 'libx264',
+                '-preset', 'fast',
+                '-crf', '23',
+                '-c:a', 'aac',
+                '-shortest',
+                '-y',
+                output_video
+            ]
+        else:
+            # Original image background logic
+            filter_complex = (
+                f'[0:v]scale={bg_width}:{bg_height},format=rgba[bg];'
+                f'[1:v]scale={speaker_width}:{speaker_height},format=rgba[fg_scaled];'
+                f'[2:v]scale={speaker_width}:{speaker_height},format=gray[alpha_scaled];'
+                f'[fg_scaled][alpha_scaled]alphamerge[masked];'
+                f'[bg][masked]overlay={pos_x}:{pos_y}:format=auto:shortest=1[out]'
+            )
+            cmd = [
+                'ffmpeg',
+                '-loop', '1',
+                '-i', background,
+                '-i', speaker_video,
+                '-i', alpha_mask,
+                '-filter_complex', filter_complex,
+                '-map', '[out]',
+                '-map', '1:a?',
+                '-c:v', 'libx264',
+                '-preset', 'fast',
+                '-crf', '23',
+                '-c:a', 'aac',
+                '-shortest',
+                '-y',
+                output_video
+            ]
     else:
         # For video background
-        filter_complex = (
-            f'[1:v]scale={speaker_width}:{speaker_height}[fg_scaled];'
-            f'[2:v]scale={speaker_width}:{speaker_height},format=gray[alpha_scaled];'
-            f'[fg_scaled][alpha_scaled]alphamerge[masked];'
-            f'[0:v][masked]overlay={pos_x}:{pos_y}:format=auto:shortest=1[out]'
-        )
-        cmd = [
-            'ffmpeg',
-            '-i', background,
-            '-i', speaker_video,
-            '-i', alpha_mask,
-            '-filter_complex', filter_complex,
-            '-map', '[out]',
-            '-map', '1:a?',
-            '-c:v', 'libx264',
-            '-preset', 'fast',
-            '-crf', '23',
-            '-c:a', 'aac',
-            '-shortest',
-            '-y',
-            output_video
-        ]
+        if mix_background_audio:
+            # Mix background video audio with speaker audio
+            filter_complex = (
+                f'[1:v]scale={speaker_width}:{speaker_height}[fg_scaled];'
+                f'[2:v]scale={speaker_width}:{speaker_height},format=gray[alpha_scaled];'
+                f'[fg_scaled][alpha_scaled]alphamerge[masked];'
+                f'[0:v][masked]overlay={pos_x}:{pos_y}:format=auto:shortest=1[out];'
+                f'[0:a][1:a]amix=inputs=2:weights="0.3 1.0":duration=shortest[aout]'
+            )
+            cmd = [
+                'ffmpeg',
+                '-i', background,
+                '-i', speaker_video,
+                '-i', alpha_mask,
+                '-filter_complex', filter_complex,
+                '-map', '[out]',
+                '-map', '[aout]',
+                '-c:v', 'libx264',
+                '-preset', 'fast',
+                '-crf', '23',
+                '-c:a', 'aac',
+                '-shortest',
+                '-y',
+                output_video
+            ]
+        else:
+            # Original video background logic (speaker audio only)
+            filter_complex = (
+                f'[1:v]scale={speaker_width}:{speaker_height}[fg_scaled];'
+                f'[2:v]scale={speaker_width}:{speaker_height},format=gray[alpha_scaled];'
+                f'[fg_scaled][alpha_scaled]alphamerge[masked];'
+                f'[0:v][masked]overlay={pos_x}:{pos_y}:format=auto:shortest=1[out]'
+            )
+            cmd = [
+                'ffmpeg',
+                '-i', background,
+                '-i', speaker_video,
+                '-i', alpha_mask,
+                '-filter_complex', filter_complex,
+                '-map', '[out]',
+                '-map', '1:a?',
+                '-c:v', 'libx264',
+                '-preset', 'fast',
+                '-crf', '23',
+                '-c:a', 'aac',
+                '-shortest',
+                '-y',
+                output_video
+            ]
     
     result = subprocess.run(cmd, capture_output=True, text=True)
     
@@ -206,6 +272,136 @@ def process_scene(
     scene_dir = output_dir / scene.id
     scene_dir.mkdir(parents=True, exist_ok=True)
     
+    # Handle broll scenes - pure video without speaker overlay
+    if scene.type == "broll":
+        print(f"\n🎬 Generating broll scene (pure video)...")
+        
+        # Generate video directly from prompt
+        print(f"📹 Generating video from text...")
+        video_output = generate_video_wan_t2v(
+            prompt=scene.video_prompt,
+            duration=int(scene.duration_s),
+        )
+        
+        # Save video
+        video_path = scene_dir / f"{scene.id}_final.mp4"
+        save_output(video_output, video_path)
+        
+        # Extract final frame for continuity
+        final_frame_path = scene_dir / f"{scene.id}_final_frame.png"
+        extract_last_frame(str(video_path), str(final_frame_path))
+        
+        print(f"✅ Broll scene saved: {video_path}")
+        return SceneOutput(
+            scene_id=scene.id,
+            video_path=str(video_path),
+            final_frame_path=str(final_frame_path),
+        )
+    
+    # Handle speaker_in_scene - transform speaker into a scene environment
+    if scene.type == "speaker_in_scene":
+        print(f"\n🎭 Generating speaker-in-scene (scene transformation)...")
+        
+        if not scene.speaker_image:
+            raise ValueError(f"Scene {scene.id} needs speaker_image for scene transformation")
+        if not scene.scene_prompt:
+            raise ValueError(f"Scene {scene.id} needs scene_prompt for scene transformation")
+        
+        # Step 1: Generate scene image with speaker using nano-banana-pro
+        print(f"🖼️ Step 1: Transforming speaker into scene...")
+        scene_image_output = generate_image(
+            prompt=scene.scene_prompt,
+            model=scene.scene_model,
+            reference_image=scene.speaker_image,
+        )
+        scene_image_path = scene_dir / f"{scene.id}_scene_frame.png"
+        save_output(scene_image_output, scene_image_path)
+        
+        # Step 2: Animate the scene image with speaker model (includes audio)
+        video_prompt = scene.video_prompt
+        if scene.script:
+            video_prompt = f'{scene.video_prompt} The person is saying: "{scene.script}"'
+        
+        print(f"📹 Step 2: Animating scene with audio...")
+        video_output = generate_video_with_image(
+            prompt=video_prompt,
+            image=str(scene_image_path),
+            duration=int(scene.duration_s),
+            generate_audio=True,
+            model=scene.speaker_model,
+        )
+        
+        video_path = scene_dir / f"{scene.id}_final.mp4"
+        save_output(video_output, video_path)
+        
+        # Extract final frame for continuity
+        final_frame_path = scene_dir / f"{scene.id}_final_frame.png"
+        extract_last_frame(str(video_path), str(final_frame_path))
+        
+        print(f"✅ Speaker-in-scene saved: {video_path}")
+        return SceneOutput(
+            scene_id=scene.id,
+            video_path=str(video_path),
+            final_frame_path=str(final_frame_path),
+        )
+    
+    # Handle speaker_angle_change - continue from previous scene with new camera angle
+    # Uses previous scene's last frame + speaker image to generate new angle
+    if scene.type == "speaker_angle_change":
+        print(f"\n🎬 Generating speaker angle change (camera rotation)...")
+        
+        if not previous_frame:
+            raise ValueError(f"Scene {scene.id} needs a previous scene's last frame for angle change")
+        if not scene.speaker_image:
+            raise ValueError(f"Scene {scene.id} needs speaker_image for angle change")
+        
+        # Build angle prompt - combines scene context with angle direction
+        angle_direction = scene.angle_prompt or "camera rotated 30 degrees to the left, different perspective"
+        base_prompt = scene.scene_prompt or scene.video_prompt
+        
+        full_angle_prompt = f"{base_prompt}, {angle_direction}, same person same setting same lighting, natural continuation"
+        
+        # Step 1: Generate new angle frame using previous frame + speaker as references
+        print(f"🖼️ Step 1: Generating new camera angle...")
+        print(f"   Angle: {angle_direction}")
+        print(f"   Using previous frame + speaker image as references")
+        
+        angle_image_output = generate_image(
+            prompt=full_angle_prompt,
+            model=scene.scene_model,
+            reference_images=[previous_frame, scene.speaker_image],
+        )
+        angle_image_path = scene_dir / f"{scene.id}_angle_frame.png"
+        save_output(angle_image_output, angle_image_path)
+        
+        # Step 2: Animate the new angle with speaker model (includes audio)
+        video_prompt = scene.video_prompt
+        if scene.script:
+            video_prompt = f'{scene.video_prompt} The person is saying: "{scene.script}"'
+        
+        print(f"📹 Step 2: Animating new angle with audio...")
+        video_output = generate_video_with_image(
+            prompt=video_prompt,
+            image=str(angle_image_path),
+            duration=int(scene.duration_s),
+            generate_audio=True,
+            model=scene.speaker_model,
+        )
+        
+        video_path = scene_dir / f"{scene.id}_final.mp4"
+        save_output(video_output, video_path)
+        
+        # Extract final frame for continuity (can chain multiple angle changes)
+        final_frame_path = scene_dir / f"{scene.id}_final_frame.png"
+        extract_last_frame(str(video_path), str(final_frame_path))
+        
+        print(f"✅ Angle change saved: {video_path}")
+        return SceneOutput(
+            scene_id=scene.id,
+            video_path=str(video_path),
+            final_frame_path=str(final_frame_path),
+        )
+    
     # Build the video prompt - include script for Veo to generate speech
     video_prompt = scene.video_prompt
     if scene.script:
@@ -225,7 +421,7 @@ def process_scene(
         image=input_image,
         duration=int(scene.duration_s),
         generate_audio=True,  # Veo generates the speaker's voice!
-        model=scene.video_model,
+        model=scene.speaker_model,  # Use speaker-specific model (e.g., veo-3.1-fast)
     )
     
     raw_video_path = scene_dir / f"{scene.id}_speaker.mp4"
@@ -246,35 +442,61 @@ def process_scene(
         background_path = scene.background
         print(f"   Using provided background: {background_path}")
     elif scene.background_prompt:
-        # Generate background VIDEO from prompt (with optional product image)
-        if scene.product_image and os.path.exists(scene.product_image):
-            print(f"   Generating background video with product image...")
-            bg_output = generate_video_with_image(
+        # Generate background based on type
+        if scene.background_type == "video":
+            # Generate video directly from text
+            # Only generate audio if background_audio prompt is specified
+            bg_generate_audio = scene.background_audio is not None
+            print(f"   Generating background video directly from text (audio: {bg_generate_audio})...")
+            bg_output = generate_video_wan_t2v(
                 prompt=scene.background_prompt,
-                image=scene.product_image,
                 duration=int(scene.duration_s),
-                generate_audio=False,
-                model=scene.video_model,
+                generate_audio=bg_generate_audio,
             )
-        else:
-            # For I2V models without a product image, generate an image first then animate
+            background_path = scene_dir / f"{scene.id}_background.mp4"
+        elif scene.background_type == "image":
+            # Generate static image only
+            print(f"   Generating background image...")
+            bg_output = generate_image(
+                prompt=scene.background_prompt,
+                model=scene.image_model,
+            )
+            background_path = scene_dir / f"{scene.id}_background.png"
+        else:  # image_to_video (default)
+            # Generate image first (with product references), then animate
+            reference_images = []
+            
+            # Load reference images from product_dir (up to 4)
+            if scene.product_dir and os.path.isdir(scene.product_dir):
+                for ext in ['*.png', '*.jpg', '*.jpeg', '*.webp']:
+                    reference_images.extend(sorted(Path(scene.product_dir).glob(ext)))
+                reference_images = [str(p) for p in reference_images[:4]]
+                print(f"   Found {len(reference_images)} product reference images")
+            elif scene.product_image and os.path.exists(scene.product_image):
+                reference_images = [scene.product_image]
+            
+            # Generate background image with references
             print(f"   Generating background image first...")
             bg_image_output = generate_image(
                 prompt=scene.background_prompt,
                 model=scene.image_model,
+                reference_images=reference_images if reference_images else None,
             )
             bg_image_path = scene_dir / f"{scene.id}_background_frame.png"
             save_output(bg_image_output, bg_image_path)
             
-            print(f"   Animating background image...")
+            # Animate the background image
+            # Only generate audio if background_audio prompt is specified
+            bg_generate_audio = scene.background_audio is not None
+            print(f"   Animating background image (audio: {bg_generate_audio})...")
             bg_output = generate_video_with_image(
                 prompt=scene.background_prompt,
                 image=str(bg_image_path),
                 duration=int(scene.duration_s),
-                generate_audio=False,
+                generate_audio=bg_generate_audio,
                 model=scene.video_model,
             )
-        background_path = scene_dir / f"{scene.id}_background.mp4"
+            background_path = scene_dir / f"{scene.id}_background.mp4"
         save_output(bg_output, background_path)
         background_path = str(background_path)
     else:
@@ -286,7 +508,7 @@ def process_scene(
                 prompt=bg_prompt,
                 image=scene.product_image,
                 duration=int(scene.duration_s),
-                generate_audio=False,
+                generate_audio=scene.generate_video_audio,
                 model=scene.video_model,
             )
             background_path = scene_dir / f"{scene.id}_background.mp4"
@@ -312,6 +534,7 @@ def process_scene(
         output_video=str(final_video_path),
         scale=scene.overlay_scale,
         position=scene.overlay_position,
+        mix_background_audio=scene.generate_video_audio,
     )
     
     # Extract last frame for next scene continuity
@@ -428,15 +651,35 @@ def run_pipeline(config_path: str, output_dir: str | None = None) -> str:
         previous_frame = output.final_frame_path
     
     # Stitch everything together
-    final_video = output_path / f"{config.title.replace(' ', '_').lower()}_final.mp4"
-    stitch_scenes(scene_outputs, str(final_video))
+    final_video_path = output_path / f"{config.title.replace(' ', '_').lower()}_final.mp4"
+    stitch_scenes(scene_outputs, str(final_video_path))
+    
+    # Add captions to final video if enabled
+    if config.caption_final_video or config.add_captions:
+        print(f"\n{'='*60}")
+        print(f"📝 Adding captions to final video...")
+        print(f"{'='*60}")
+        
+        captioned_output = add_captions(
+            input_video=str(final_video_path),
+            language=config.caption_language,
+            highlight_color=config.caption_color,
+        )
+        
+        # Save captioned version
+        captioned_path = output_path / f"{config.title.replace(' ', '_').lower()}_captioned.mp4"
+        save_output(captioned_output, captioned_path)
+        
+        # Use captioned version as final
+        final_video_path = captioned_path
+        print(f"✅ Captioned video saved: {final_video_path}")
     
     print(f"\n\n{'#'*60}")
     print(f"# Pipeline Complete!")
-    print(f"# Output: {final_video}")
+    print(f"# Output: {final_video_path}")
     print(f"{'#'*60}\n")
     
-    return str(final_video)
+    return str(final_video_path)
 
 
 if __name__ == "__main__":

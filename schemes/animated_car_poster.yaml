@@ -1,0 +1,188 @@
+# =============================================================================
+# Animated Car Poster Product Ad
+# =============================================================================
+# Creative product ad for a car poster where the poster comes to life
+# Niche: Product Advertisement / E-commerce
+# Language: English
+# Features: Animated product shots, minimal speaker, creative transitions
+#
+# SCENE TYPES:
+#   - speaker: Person talking with background overlay
+#   - speaker_in_scene: Transform speaker into home decor setting (nano-banana-pro)
+#   - broll: Pure product animation scenes without speaker
+#
+# PRODUCT ASSETS:
+#   products/car_poster/image.png - The car poster product image
+# =============================================================================
+
+title: "Animated Car Poster Ad"
+aspect_ratio: "9:16"
+resolution: "720p"
+
+# Model configuration - using fast models for cost efficiency
+speaker_model: veo-3.1-fast # For speaker videos (has audio)
+video_model: wan-2.5-i2v-fast # For background I2V animation
+image_model: flux-2-pro # For background images
+
+# Caption configuration - TikTok-style animated captions
+caption_final_video: true # Add captions to final stitched video
+caption_color: "#EF4444" # Red to match Ferrari aesthetic
+caption_language: en # English
+
+scenes:
+  # Scene 1: Static poster reveal - product comes to life
+  # Duration: 5s - Pure product animation, NO SPEAKER
+  # The poster image animates while staying in frame
+  - id: "poster_reveal"
+    type: "broll"
+    duration_s: 5
+
+    script: ""
+
+    # Animate the poster - car within poster starts moving
+    video_prompt: >
+      Elegant black wooden frame with red Ferrari 488 poster,
+      hanging on minimalist white textured wall,
+      single warm spotlight illuminating the frame,
+      car headlights within poster suddenly glow amber,
+      subtle engine vibration effect on the image,
+      dust particles floating in golden sunbeam,
+      camera slowly pushing in on the poster,
+      premium home decor gallery aesthetic,
+      vertical 9:16 format
+
+    product_image: "products/car_poster/image.png"
+
+    # Epic car audio for the reveal
+    background_audio: "Ferrari V8 engine revving, dramatic cinematic bass"
+
+  # Scene 2: Car breaks free - cinematic moment
+  # Duration: 5s - Pure visual spectacle
+  - id: "car_escape"
+    type: "broll"
+    duration_s: 5
+
+    script: ""
+
+    video_prompt: >
+      Red Ferrari 488 dramatically emerging from picture frame,
+      glass frame shattering in slow motion into thousands of pieces,
+      car transitioning from 2D poster to 3D reality,
+      dramatic orange lens flares and volumetric light beams,
+      white smoke billowing around wheels,
+      golden particle effects swirling,
+      cinematic camera tracking the car as it breaks free,
+      Hollywood VFX quality, vertical 9:16 format
+
+    product_image: "products/car_poster/image.png"
+
+    # Epic cinematic audio
+    background_audio: "glass shattering, epic orchestral music building, engine roar"
+
+  # Scene 3: Car in action - full cinematic shot
+  # Duration: 5s - The car now fully alive
+  - id: "car_action"
+    type: "broll"
+    duration_s: 5
+
+    script: ""
+
+    video_prompt: >
+      Red Ferrari 488 racing through winding mountain road,
+      golden hour sunset lighting with orange and purple sky,
+      dramatic cliff edges with pine trees,
+      motion blur on black alloy wheels spinning,
+      dust trail billowing behind the car,
+      cinematic drone shot tracking alongside vehicle,
+      epic landscape with snow-capped mountains in distance,
+      professional automotive commercial quality,
+      vertical 9:16 format
+
+    product_image: "products/car_poster/image.png"
+
+    # Cinematic driving audio
+    background_audio: "Ferrari engine roaring, wind rushing, epic cinematic score"
+
+  # Scene 4: Speaker in stylish apartment - lifestyle shot
+  # Uses nano-banana-pro to put speaker in home decor setting
+  - id: "lifestyle_shot"
+    type: "speaker_in_scene"
+    duration_s: 5
+
+    script: "This poster literally comes to life. Your walls need this energy."
+
+    speaker_image: "speakers/female4.png"
+
+    # Scene transformation - puts speaker in stylish apartment
+    scene_prompt: >
+      Stylish woman in modern minimalist apartment,
+      standing next to white wall with framed car poster,
+      wearing cream cashmere sweater, relaxed confident pose,
+      mid-century modern furniture visible,
+      large window with city view, warm afternoon light,
+      home decor influencer aesthetic, vertical 9:16 format
+    scene_model: nano-banana-pro
+    # Video animation prompt
+    video_prompt: >
+      Stylish woman in apartment gesturing towards car poster on wall,
+      warm genuine smile, sophisticated demeanor,
+      mouth movements synchronized with English speech,
+      speaking style enthusiastic and genuine, lifestyle recommendation
+
+  # Scene 5: Angle change - continue apartment scene from different angle
+  # Uses previous scene's last frame for natural multi-angle conversation
+  - id: "lifestyle_angle"
+    type: "speaker_angle_change"
+    duration_s: 5
+
+    script: "I stare at it every morning. It just hits different."
+
+    speaker_image: "speakers/female4.png"
+
+    # Angle change - closer shot, different perspective
+    angle_prompt: >
+      camera rotated 20 degrees to the left,
+      tighter framing showing face and poster in background,
+      same apartment setting, same warm lighting
+
+    scene_prompt: >
+      Stylish woman in modern apartment,
+      car poster visible on wall behind her,
+      cream cashmere sweater, warm afternoon light
+
+    video_prompt: >
+      Stylish woman looking at poster then back to camera,
+      genuine appreciation expression, slight smile,
+      mouth movements synchronized with English speech,
+      speaking style authentic and personal, genuine recommendation
+
+  # Scene 6: CTA - product reveal with speaker
+  # Duration: 5s = 11-15 words
+  - id: "cta"
+    type: "speaker"
+    duration_s: 5
+
+    script: "Get yours now. Link in bio. Your walls will thank you."
+
+    video_prompt: >
+      Stylish woman with warm inviting smile,
+      pointing down gesture for link in bio,
+      wearing cream cashmere sweater,
+      green screen background, soft natural lighting,
+      mouth movements synchronized with English speech,
+      speaking style warm and inviting, call to action energy
+
+    speaker_image: "speakers/female4.png"
+
+    overlay_scale: 0.40
+    overlay_position: "bottom_right"
+
+    background_prompt: >
+      Red Ferrari poster in elegant black frame on white wall,
+      subtle golden glow effect around frame edges,
+      "LIMITED EDITION" badge in corner,
+      price tag showing "$49.99" with strikethrough "$79.99",
+      "SHOP NOW" button animation,
+      premium home decor aesthetic,
+      vertical 9:16 format
+    background_type: video

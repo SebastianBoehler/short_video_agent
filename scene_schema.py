@@ -25,7 +25,7 @@ VALID_VEO_DURATIONS = [4, 6, 8]
 class SceneConfig:
     """Configuration for a single scene."""
     id: str
-    type: Literal["speaker", "broll", "product", "transition"]
+    type: Literal["speaker", "speaker_in_scene", "speaker_angle_change", "broll", "product", "transition"]
     duration_s: float
     
     # Video generation
@@ -40,20 +40,36 @@ class SceneConfig:
     emotion: Optional[str] = None      # TTS emotion
     
     # Product
-    product_image: Optional[str] = None  # Product image to include in background generation
+    product_image: Optional[str] = None  # Single product image for background generation
+    product_dir: Optional[str] = None    # Directory with product images (uses up to 4 as references)
+    
+    # Scene transformation (for speaker_in_scene type)
+    scene_prompt: Optional[str] = None  # Prompt describing scene to put speaker into
+    scene_model: str = "nano-banana-pro"  # Model for scene transformation
+    
+    # Angle change (for speaker_angle_change type - uses previous scene's last frame)
+    angle_prompt: Optional[str] = None  # Prompt describing camera angle change (e.g., "30 degrees left rotation")
     
     # Compositing
     background: Optional[str] = None   # Background image/video path
-    background_prompt: Optional[str] = None  # Prompt for generating background video
+    background_prompt: Optional[str] = None  # Prompt for generating background
+    background_type: str = "image_to_video"  # Type: "image", "video", "image_to_video"
     overlay_position: str = "bottom_right"   # Position: top_left, top_right, bottom_left, bottom_right, center
     overlay_scale: float = 0.35        # Scale factor for speaker overlay (0.35 = 35% of frame)
     
     # Audio
     generate_video_audio: bool = False  # Use Veo's built-in audio generation
-    background_music: Optional[str] = None  # Path to background music
+    background_audio: Optional[str] = None  # Audio prompt for background video (None = no audio)
+    background_music: Optional[str] = None  # Path to background music file
+    
+    # Captions
+    add_captions: bool = False  # Add TikTok-style animated captions to this scene
+    caption_color: str = "#FFFFFF"  # Highlight color for captions (hex)
+    caption_language: str = "auto"  # Language for caption detection
     
     # Models to use (override defaults)
-    video_model: str = "wan-2.5-i2v"
+    video_model: str = "wan-2.5-i2v"      # For background video generation
+    speaker_model: str = "veo-3.1-fast"   # For speaker video generation
     image_model: str = "flux-2-pro"
     tts_model: str = "speech-02-hd"
     
@@ -107,6 +123,12 @@ class AdConfig:
     # Branding
     brand_colors: list[str] = field(default_factory=list)
     logo_path: Optional[str] = None
+    
+    # Global caption settings (can be overridden per scene)
+    add_captions: bool = False  # Add captions to all scenes by default
+    caption_color: str = "#FFFFFF"  # Default caption highlight color
+    caption_language: str = "auto"  # Default language for captions
+    caption_final_video: bool = False  # Add captions to final stitched video instead of per-scene
     
     @property
     def total_duration(self) -> float:
@@ -186,6 +208,7 @@ def _resolve_path(path: Optional[str], base_dir: Optional[Path] = None) -> Optio
 def load_scene_config(
     data: dict,
     default_video_model: str = "wan-2.5-i2v",
+    default_speaker_model: str = "veo-3.1-fast",
     default_image_model: str = "flux-2-pro",
     default_tts_model: str = "speech-02-hd",
     base_dir: Optional[Path] = None,
@@ -203,13 +226,23 @@ def load_scene_config(
         voice_id=data.get("voice_id"),
         emotion=data.get("emotion"),
         product_image=_resolve_path(data.get("product_image"), base_dir),
+        product_dir=_resolve_path(data.get("product_dir"), base_dir),
+        scene_prompt=data.get("scene_prompt"),
+        scene_model=data.get("scene_model", "nano-banana-pro"),
+        angle_prompt=data.get("angle_prompt"),
         background=_resolve_path(data.get("background"), base_dir),
         background_prompt=data.get("background_prompt"),
+        background_type=data.get("background_type", "image_to_video"),
         overlay_position=data.get("overlay_position", "bottom_right"),
         overlay_scale=data.get("overlay_scale", 0.35),
         generate_video_audio=data.get("generate_video_audio", False),
+        background_audio=data.get("background_audio"),
         background_music=_resolve_path(data.get("background_music"), base_dir),
+        add_captions=data.get("add_captions", False),
+        caption_color=data.get("caption_color", "#FFFFFF"),
+        caption_language=data.get("caption_language", "auto"),
         video_model=data.get("video_model", default_video_model),
+        speaker_model=data.get("speaker_model", default_speaker_model),
         image_model=data.get("image_model", default_image_model),
         tts_model=data.get("tts_model", default_tts_model),
     )
@@ -219,12 +252,13 @@ def load_ad_config(data: dict, base_dir: Optional[Path] = None) -> AdConfig:
     """Load an AdConfig from a dictionary."""
     # Get global model defaults
     global_video_model = data.get("video_model", "wan-2.5-i2v")
+    global_speaker_model = data.get("speaker_model", "veo-3.1-fast")
     global_image_model = data.get("image_model", "flux-2-pro")
     global_tts_model = data.get("tts_model", "speech-02-hd")
     
     # Load scenes with global defaults
     scenes = [
-        load_scene_config(s, global_video_model, global_image_model, global_tts_model, base_dir) 
+        load_scene_config(s, global_video_model, global_speaker_model, global_image_model, global_tts_model, base_dir) 
         for s in data.get("scenes", [])
     ]
     
@@ -240,6 +274,10 @@ def load_ad_config(data: dict, base_dir: Optional[Path] = None) -> AdConfig:
         tts_model=data.get("tts_model", "speech-02-hd"),
         brand_colors=data.get("brand_colors", []),
         logo_path=data.get("logo_path"),
+        add_captions=data.get("add_captions", False),
+        caption_color=data.get("caption_color", "#FFFFFF"),
+        caption_language=data.get("caption_language", "auto"),
+        caption_final_video=data.get("caption_final_video", False),
     )
 
 

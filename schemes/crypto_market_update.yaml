@@ -1,0 +1,208 @@
+# =============================================================================
+# Crypto Market Update News
+# =============================================================================
+# News-style crypto market update with professional presentation
+# Niche: Finance / Crypto News
+# Language: English
+# Features: News format, data visualization backgrounds, professional tone
+#
+# SCENE TYPES:
+#   - speaker: News anchor with background overlay
+#   - speaker_in_scene: Transform speaker into trading floor (nano-banana-pro)
+#   - broll: Pure chart/data visualization scenes
+# =============================================================================
+
+title: "Crypto Market Breaking News"
+aspect_ratio: "9:16"
+resolution: "720p"
+
+# Model configuration - using fast models for cost efficiency
+speaker_model: veo-3.1-fast # For speaker videos (has audio)
+video_model: wan-2.5-i2v-fast # For background I2V animation
+image_model: flux-2-pro # For background images
+
+# Caption configuration - TikTok-style animated captions
+caption_final_video: true # Add captions to final stitched video
+caption_color: "#22C55E" # Green for bullish crypto vibes
+caption_language: en # English
+
+scenes:
+  # Scene 1: Breaking news hook
+  # Duration: 5s = 11-15 words
+  - id: "breaking_news"
+    type: "speaker"
+    duration_s: 5
+
+    script: "Breaking news. Bitcoin just broke a key level. Here's what this means."
+    # 13 words ^
+
+    # Professional news anchor description - specific details
+    video_prompt: >
+      Professional female news anchor in navy blazer,
+      serious but engaging expression, speaking to camera with authority,
+      green screen background, bright professional studio lighting,
+      news desk framing from chest up,
+      mouth movements synchronized with English speech,
+      speaking style urgent and authoritative, breaking news energy
+
+    speaker_image: "speakers/female5.png"
+
+    overlay_scale: 0.35
+    overlay_position: "bottom_right"
+
+    background_type: image_to_video
+
+    # Background matches CRYPTO NEWS theme - specific elements
+    background_prompt: >
+      Professional crypto trading dashboard on large monitor,
+      Bitcoin price chart showing dramatic green candlestick breakout,
+      price ticker showing $67,432 with +8.5% in green,
+      "BREAKING NEWS" red banner at bottom of screen,
+      volume bars spiking, RSI indicator in corner,
+      dark Bloomberg terminal aesthetic with green accents,
+      vertical 9:16 format
+
+  # Scene 2: Data visualization - chart analysis
+  # Duration: 5s - Background video with speech overlay (no background audio)
+  - id: "chart_analysis"
+    type: "speaker"
+    duration_s: 5
+
+    script: "Look at this chart. Bitcoin just broke through sixty thousand dollars."
+
+    video_prompt: >
+      Professional female news anchor in navy blazer,
+      analytical expression explaining complex topic,
+      hands gesturing towards imaginary screen,
+      green screen background, professional studio lighting,
+      mouth movements synchronized with English speech,
+      speaking style analytical and informative, expert delivery
+
+    speaker_image: "speakers/female5.png"
+
+    overlay_scale: 0.35
+    overlay_position: "bottom_left"
+
+    background_prompt: >
+      Animated Bitcoin price chart on TradingView interface,
+      dramatic green candlestick breaking through $60,000 resistance line,
+      50-day and 200-day moving averages crossing (golden cross),
+      RSI indicator showing 72 in overbought zone,
+      volume bars spiking green at breakout point,
+      price alert popup showing "BREAKOUT CONFIRMED",
+      dark professional trading platform aesthetic,
+      vertical 9:16 format
+    background_type: image_to_video
+
+  # Scene 3: Speaker on trading floor - lifestyle transformation
+  # Uses nano-banana-pro to put anchor in professional setting
+  - id: "trading_floor"
+    type: "speaker_in_scene"
+    duration_s: 5
+
+    script: "The resistance broke. Big money flows in. This could be the start."
+
+    speaker_image: "speakers/female5.png"
+
+    # Scene transformation - puts speaker on trading floor
+    scene_prompt: >
+      Professional female news anchor standing on trading floor,
+      multiple Bloomberg terminals and monitors behind her,
+      traders in background at desks, ticker tape displays,
+      professional navy blazer, holding tablet,
+      financial district aesthetic, vertical 9:16 format
+    scene_model: nano-banana-pro
+    # Video animation prompt
+    video_prompt: >
+      Female news anchor on trading floor gesturing to screens behind her,
+      confident analytical expression, professional demeanor,
+      mouth movements synchronized with English speech,
+      speaking style authoritative and insightful, expert analysis
+
+  # Scene 4: Angle change - continue trading floor from different angle
+  # Uses previous scene's last frame for natural multi-angle news report
+  - id: "trading_floor_angle"
+    type: "speaker_angle_change"
+    duration_s: 5
+
+    script: "Institutional buyers are moving fast. The smart money is already in."
+
+    speaker_image: "speakers/female5.png"
+
+    # Angle change - wider shot showing more of trading floor
+    angle_prompt: >
+      camera rotated 30 degrees to the left,
+      wider framing showing more trading floor activity,
+      same professional setting, same lighting
+
+    scene_prompt: >
+      Professional female news anchor on trading floor,
+      Bloomberg terminals visible, traders at desks,
+      professional navy blazer, authoritative stance
+
+    video_prompt: >
+      Female news anchor walking slightly while speaking,
+      gesturing towards trading activity behind her,
+      mouth movements synchronized with English speech,
+      speaking style confident and informative, live report energy
+
+  # Scene 5: What this means - implications
+  # Duration: 5s = 11-15 words
+  - id: "implications"
+    type: "speaker"
+    duration_s: 5
+
+    script: "If you're holding, good news. Not in yet? Window might be closing."
+
+    video_prompt: >
+      Professional female news anchor in navy blazer,
+      direct eye contact, slightly raised eyebrows emphasizing importance,
+      green screen background, professional studio lighting,
+      delivering important information with gravity,
+      mouth movements synchronized with English speech,
+      speaking style direct and impactful, urgency without panic
+
+    speaker_image: "speakers/female5.png"
+
+    overlay_scale: 0.40
+    overlay_position: "bottom_left"
+
+    background_prompt: >
+      Fear and Greed Index gauge showing needle moving to "Greed" zone,
+      Bitcoin wallet balance graphic showing green gains,
+      countdown timer graphic suggesting limited opportunity,
+      institutional buying flow arrows pointing up,
+      professional financial infographic style,
+      dark background with green and amber accents,
+      vertical 9:16 format
+    background_type: image_to_video
+
+  # Scene 5: CTA - follow for updates
+  # Duration: 5s = 11-15 words
+  - id: "cta"
+    type: "speaker"
+    duration_s: 5
+
+    script: "Follow for daily crypto updates. Don't miss the next big move."
+
+    video_prompt: >
+      Professional female news anchor in navy blazer,
+      friendly but professional smile, subtle nod,
+      green screen background, professional studio lighting,
+      mouth movements synchronized with English speech,
+      speaking style warm and inviting, professional sign-off
+
+    speaker_image: "speakers/female5.png"
+
+    overlay_scale: 0.45
+    overlay_position: "bottom_right"
+
+    background_prompt: >
+      Crypto news channel end screen,
+      large "FOLLOW" button with notification bell icon,
+      Bitcoin and Ethereum logos floating,
+      "Daily Market Updates" text banner,
+      subscriber count ticker animation,
+      professional dark blue background with gold accents,
+      vertical 9:16 format
+    background_type: video
