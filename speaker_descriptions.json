@@ -1,0 +1,44 @@
+{
+  "speaker1": {
+    "filename": "speaker1.png",
+    "basic_caption": "Unable to generate caption",
+    "detailed_caption": "Unable to generate caption",
+    "video_prompt": "Unable to generate caption, professional headshot, clear lighting, vertical video format, looking at camera",
+    "generated_at": "/Users/sebastianboehler/Documents/GitHub/short_video_agent"
+  },
+  "speaker2": {
+    "filename": "speaker2.png",
+    "basic_caption": "Unable to generate caption",
+    "detailed_caption": "Unable to generate caption",
+    "video_prompt": "Unable to generate caption, professional headshot, clear lighting, vertical video format, looking at camera",
+    "generated_at": "/Users/sebastianboehler/Documents/GitHub/short_video_agent"
+  },
+  "speaker3": {
+    "filename": "speaker3.png",
+    "basic_caption": "Unable to generate caption",
+    "detailed_caption": "Unable to generate caption",
+    "video_prompt": "Unable to generate caption, professional headshot, clear lighting, vertical video format, looking at camera",
+    "generated_at": "/Users/sebastianboehler/Documents/GitHub/short_video_agent"
+  },
+  "speaker4": {
+    "filename": "speaker4.png",
+    "basic_caption": "Unable to generate caption",
+    "detailed_caption": "Unable to generate caption",
+    "video_prompt": "Unable to generate caption, professional headshot, clear lighting, vertical video format, looking at camera",
+    "generated_at": "/Users/sebastianboehler/Documents/GitHub/short_video_agent"
+  },
+  "speaker5": {
+    "filename": "speaker5.png",
+    "basic_caption": "Unable to generate caption",
+    "detailed_caption": "Unable to generate caption",
+    "video_prompt": "Unable to generate caption, professional headshot, clear lighting, vertical video format, looking at camera",
+    "generated_at": "/Users/sebastianboehler/Documents/GitHub/short_video_agent"
+  },
+  "speaker6": {
+    "filename": "speaker6.png",
+    "basic_caption": "Unable to generate caption",
+    "detailed_caption": "Unable to generate caption",
+    "video_prompt": "Unable to generate caption, professional headshot, clear lighting, vertical video format, looking at camera",
+    "generated_at": "/Users/sebastianboehler/Documents/GitHub/short_video_agent"
+  }
+}

@@ -1,0 +1,253 @@
+# =============================================================================
+# HB Capital - TradingView Indicators Ad
+# =============================================================================
+#
+# COMPANY: HB Capital
+# - Algorithmic trading & deep learning for trading
+# - Public offering: TradingView indicators
+# - Target audience: Retail traders, crypto/forex enthusiasts
+#
+# AD GOAL: Promote TradingView indicators to public
+# - Show the iOS app mockups and indicator screenshots
+# - Young, professional female presenter (speaker8)
+# - Modern fintech aesthetic
+#
+# PRODUCT ASSETS (use as reference images for start frames):
+#   products/hb_capital/image.png   - iOS app screenshot/mockup
+#   products/hb_capital/image2.png  - iOS app screenshot/mockup
+#   products/hb_capital/image3.png  - iOS app screenshot/mockup
+#
+# NOTE: Wan I2V models (wan-2.5-i2v, wan-2.5-i2v-fast) support an optional
+# audio file input via the "audio" key for synchronized audio generation.
+# =============================================================================
+
+title: HB Capital TradingView Indicators
+aspect_ratio: "9:16"
+
+# Model configuration - using fast models for cost efficiency
+speaker_model: veo-3.1-fast # For speaker videos (has audio)
+video_model: wan-2.5-i2v-fast # For background I2V animation
+image_model: flux-2-pro # For background images
+
+# Caption configuration - TikTok-style animated captions
+caption_final_video: true # Add captions to final stitched video
+caption_color: "#00D4FF" # Cyan/teal for modern fintech aesthetic
+caption_language: de # German language (cheaper than seedream)
+# Note: background_type: video uses wan-2.5-t2v internally for pure T2V
+
+# Product directory for reference images
+# product_dir: products/hb_capital
+
+scenes:
+  - id: scene_1
+    type: speaker
+    duration_s: 5
+    # ~12 words for 5s duration
+    script: "Hey, willst du endlich wissen wann du kaufen und verkaufen sollst?"
+
+    # Speaker: young well-dressed female (speaker8)
+    speaker_image: speakers/female8.png
+    video_prompt: >
+      Young professional woman in her mid-20s, stylish business casual outfit,
+      confident and approachable expression, talking directly to camera,
+      green screen background, soft studio lighting,
+      mouth movements synchronized with German speech,
+      fintech influencer aesthetic,
+      speaking style calm and composed, refined conversational tone
+
+    overlay_scale: 0.45
+    overlay_position: bottom_left
+
+    # Background: generate image first (with product reference), then animate to video
+    background_prompt: >
+      Modern minimalist office with glass desk and chrome legs,
+      ultrawide curved monitor showing clean trading charts,
+      wireless keyboard and mouse on white desk mat,
+      sleek LED desk lamp with cool white light,
+      floor-to-ceiling windows with city skyline view,
+      concrete accent wall, indoor plant in white ceramic pot,
+      modern fintech aesthetic, cool neutral tones,
+      slow subtle camera push-in, vertical 9:16 format
+    background_type: image_to_video
+    # Product directory - uses up to 4 images as references for background generation
+    product_dir: products/hb_capital
+
+  # Scene 2: Problem/Pain point - what traders struggle with
+  # Duration: 5s = ~12 words
+  - id: scene_2
+    type: speaker
+    duration_s: 5
+    script: "Kein Raten mehr. Kein Bauchgefühl. Nur klare Signale."
+
+    speaker_image: speakers/female8.png
+    video_prompt: >
+      Young professional woman in her mid-20s, stylish business casual outfit,
+      serious and determined expression, talking directly to camera,
+      green screen background, soft studio lighting,
+      mouth movements synchronized with German speech,
+      slight head shake then confident nod,
+      speaking style calm and authoritative, professional tone
+
+    overlay_scale: 0.45
+    overlay_position: bottom_right
+
+    # Background: trading charts with clear buy/sell signals
+    background_prompt: >
+      Ultrawide curved monitor displaying clean candlestick chart,
+      bright green buy signals and red sell signals visible,
+      dark mode interface with cyan and white accents,
+      reflection of city lights on glossy screen surface,
+      glass desk with brushed steel frame visible,
+      modern tech startup aesthetic,
+      slow gentle camera push-in, vertical 9:16 format
+    background_type: image_to_video
+    product_dir: products/hb_capital
+
+  # Scene 3: Solution - the indicator in action
+  # Duration: 5s = ~12 words
+  - id: scene_3
+    type: speaker
+    duration_s: 5
+    script: "Unsere Indikatoren zeigen dir den perfekten Einstieg."
+
+    speaker_image: speakers/female8.png
+    video_prompt: >
+      Young professional woman in her mid-20s, stylish business casual outfit,
+      confident smile, pointing gesture as if showing something,
+      green screen background, soft studio lighting,
+      mouth movements synchronized with German speech,
+      poised demeanor,
+      speaking style measured and trustworthy, advisory tone
+
+    overlay_scale: 0.45
+    overlay_position: bottom_left
+
+    # Background: product showcase with app
+    background_prompt: >
+      iPhone Pro on wireless charging stand,
+      screen showing sleek trading interface with glowing indicators,
+      AirPods Pro case beside phone,
+      matcha latte in modern ceramic cup,
+      MacBook Pro partially visible in background,
+      bright natural light from panoramic windows,
+      modern tech lifestyle aesthetic, slow subtle animation,
+      vertical 9:16 format
+    background_type: image_to_video
+    product_dir: products/hb_capital
+
+  # Scene 4: Social proof / testimonial feel
+  # Duration: 5s = ~12 words
+  - id: scene_4
+    type: speaker
+    duration_s: 5
+    script: "Tausende Trader nutzen es bereits. Jeden Tag."
+
+    speaker_image: speakers/female8.png
+    video_prompt: >
+      Young professional woman in her mid-20s, stylish business casual outfit,
+      knowing smile, nodding slightly as if sharing a secret,
+      green screen background, soft studio lighting,
+      mouth movements synchronized with German speech,
+      speaking style confident and reassuring, trust-building tone
+
+    overlay_scale: 0.45
+    overlay_position: bottom_right
+
+    # Background: community/success montage feel
+    background_prompt: >
+      Modern co-working space with glass partitions,
+      digital world map display on wall showing live data,
+      ergonomic mesh chair at standing desk,
+      multiple monitors showing different markets,
+      exposed concrete ceiling with track lighting,
+      large windows with urban skyline view,
+      tech startup success aesthetic,
+      slow gentle camera pan, vertical 9:16 format
+    background_type: image_to_video
+    product_dir: products/hb_capital
+
+  # Scene 5: Speaker in luxury hotel - lifestyle aspiration
+  # Uses nano-banana-pro to transform speaker into scene
+  # Duration: 5s = ~12 words
+  - id: scene_5
+    type: speaker_in_scene
+    duration_s: 5
+    script: "Trading von überall. Freiheit, die sich auszahlt."
+
+    speaker_image: speakers/female8.png
+
+    # Scene transformation - puts speaker into modern penthouse
+    scene_prompt: >
+      Young professional woman in sleek white blazer standing by floor-to-ceiling window,
+      modern penthouse with panoramic city skyline view,
+      polished concrete floors, designer lounge chair, minimalist decor,
+      morning light streaming through frameless glass,
+      holding iPad casually, relaxed confident posture,
+      contemporary luxury, cool neutral tones, vertical 9:16 format
+    scene_model: nano-banana-pro
+    # Video animation prompt
+    video_prompt: >
+      Stylish woman in modern penthouse looking out window then turning to camera,
+      soft natural movements, confident demeanor,
+      mouth movements synchronized with German speech,
+      speaking style calm and sophisticated, lifestyle confidence
+
+  # Scene 6: Angle change - continue hotel scene from different angle
+  # Uses previous scene's last frame + speaker to create natural multi-angle conversation
+  # Duration: 5s = ~12 words
+  - id: scene_6
+    type: speaker_angle_change
+    duration_s: 5
+    script: "Egal ob Strand, Café oder Zuhause. Deine Strategie, dein Tempo."
+
+    speaker_image: speakers/female8.png
+
+    # Angle change direction - describes camera movement from previous shot
+    angle_prompt: >
+      camera rotated 25 degrees to the right,
+      slightly closer framing, over-the-shoulder perspective,
+      same modern penthouse, same lighting
+
+    # Base scene context (combined with angle_prompt)
+    scene_prompt: >
+      Young professional woman in sleek white blazer in modern penthouse,
+      panoramic city skyline through glass window, morning light,
+      relaxed confident posture, iPad in hand
+
+    # Video animation prompt
+    video_prompt: >
+      Stylish woman in penthouse gesturing naturally while speaking,
+      warm genuine expression, subtle head movements,
+      mouth movements synchronized with German speech,
+      speaking style conversational and authentic, natural continuation
+
+  # Scene 7: Aspiration/CTA - what success looks like
+  # Duration: 5s = ~12 words
+  - id: scene_7
+    type: speaker
+    duration_s: 5
+    script: "Starte jetzt und trade wie die Profis. Link in Bio!"
+
+    speaker_image: speakers/female8.png
+    video_prompt: >
+      Young professional woman in her mid-20s, stylish business casual outfit,
+      warm and inviting expression, talking directly to camera,
+      green screen background, soft studio lighting,
+      mouth movements synchronized with German speech,
+      pointing down gesture for link in bio,
+      speaking style warm and inviting, gentle encouragement
+
+    overlay_scale: 0.45
+    overlay_position: bottom_left
+
+    # Background: modern success lifestyle - rooftop with city view
+    background_prompt: >
+      Modern rooftop terrace with infinity pool edge visible,
+      sleek outdoor lounge furniture in white and grey,
+      city skyline at golden hour in background,
+      glass balustrade with chrome railings,
+      potted olive trees and modern planters,
+      warm sunset light with cool urban backdrop,
+      contemporary luxury lifestyle, aspirational but attainable,
+      slow graceful camera movement, vertical 9:16 format
+    background_type: video

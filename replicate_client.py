@@ -33,6 +33,7 @@ class ModelType(Enum):
     TEXT_TO_SPEECH = "text_to_speech"
     VOICE_CLONING = "voice_cloning"
     VIDEO_MATTING = "video_matting"
+    VIDEO_CAPTIONING = "video_captioning"
 
 
 @dataclass
@@ -91,10 +92,25 @@ MODEL_REGISTRY: dict[str, ModelConfig] = {
         default_params={
             "resolution": "1 MP",
             "aspect_ratio": "9:16",
-            "output_format": "webp",
+            "output_format": "png",
         },
         cost_tier="standard",
         description="FLUX 2 Pro - high quality image generation"
+    ),
+    "seedream-4.5": ModelConfig(
+        name="seedream-4.5",
+        model_id="bytedance/seedream-4.5",
+        model_type=ModelType.TEXT_TO_IMAGE,
+        default_params={
+            "size": "4K",
+            #"width": 2048, overriden by aspect ratio
+            #"height": 2048,
+            "max_images": 1,
+            "aspect_ratio": "9:16",
+            "sequential_image_generation": "disabled",
+        },
+        cost_tier="cheap",
+        description="Seedream 4.5 - cheap image generation with reference image support"
     ),
     "flux-1.1-pro": ModelConfig(
         name="flux-1.1-pro",
@@ -102,7 +118,7 @@ MODEL_REGISTRY: dict[str, ModelConfig] = {
         model_type=ModelType.TEXT_TO_IMAGE,
         default_params={
             "aspect_ratio": "9:16",
-            "output_format": "webp",
+            "output_format": "png",
         },
         cost_tier="cheap",
         description="FLUX 1.1 Pro - fast, cheaper image generation"
@@ -135,6 +151,28 @@ MODEL_REGISTRY: dict[str, ModelConfig] = {
         },
         cost_tier="cheap",
         description="Robust Video Matting - background removal for videos"
+    ),
+    
+    # Video captioning models
+    "tiktok-captions": ModelConfig(
+        name="tiktok-captions",
+        model_id="shreejalmaharjan-27/tiktok-short-captions:46bf1c12c77ad1782d6f87828d4d8ba4d48646b8e1271b490cb9e95ccdbc4504",
+        model_type=ModelType.VIDEO_CAPTIONING,
+        default_params={
+            "model": "large-v3",
+            "language": "auto",
+            "temperature": 0,
+            "caption_size": 100,
+            "highlight_color": "#FFFFFF",
+            "suppress_tokens": "-1",
+            "logprob_threshold": -1,
+            "no_speech_threshold": 0.6,
+            "condition_on_previous_text": True,
+            "compression_ratio_threshold": 2.4,
+            "temperature_increment_on_fallback": 0.2,
+        },
+        cost_tier="cheap",
+        description="TikTok-style captions - adds animated captions to video"
     ),
     
     # Text-to-speech models
@@ -208,6 +246,25 @@ MODEL_REGISTRY: dict[str, ModelConfig] = {
         description="Wan 2.5 I2V - cheap image-to-video with audio, durations: 5 or 10s (~$0.05/run)"
     ),
     
+    # Wan 2.5 Image-to-Video Fast - faster, cheaper version
+    # Valid durations: 5 or 10 seconds only
+    "wan-2.5-i2v-fast": ModelConfig(
+        name="wan-2.5-i2v-fast",
+        model_id="wan-video/wan-2.5-i2v-fast",
+        model_type=ModelType.IMAGE_TO_VIDEO,
+        default_params={
+            "duration": 5,
+            "resolution": "720p",
+            "negative_prompt": "",
+            "enable_prompt_expansion": True,
+        },
+        supports_start_frame=True,
+        supports_end_frame=False,
+        supports_audio=True,
+        cost_tier="cheap",
+        description="Wan 2.5 I2V Fast - faster image-to-video, durations: 5 or 10s"
+    ),
+    
     # Wan 2.5 Text-to-Video - text-to-video without image input
     # Valid durations: 5 or 10 seconds only
     "wan-2.5-t2v": ModelConfig(
@@ -226,11 +283,69 @@ MODEL_REGISTRY: dict[str, ModelConfig] = {
         cost_tier="cheap",
         description="Wan 2.5 T2V - text-to-video with audio, durations: 5 or 10s (~$0.05/run)"
     ),
+    
+    # Wan 2.5 Text-to-Video Fast - faster, cheaper version
+    # Valid durations: 5 or 10 seconds only
+    "wan-2.5-t2v-fast": ModelConfig(
+        name="wan-2.5-t2v-fast",
+        model_id="wan-video/wan-2.5-t2v-fast",
+        model_type=ModelType.TEXT_TO_VIDEO,
+        default_params={
+            "size": "720*1280",  # 9:16 vertical (width*height)
+            "duration": 5,
+            "negative_prompt": "",
+            "enable_prompt_expansion": True,
+        },
+        supports_start_frame=False,
+        supports_end_frame=False,
+        supports_audio=True,
+        cost_tier="cheap",
+        description="Wan 2.5 T2V Fast - faster text-to-video, durations: 5 or 10s"
+    ),
+    
+    # Seedance 1 Pro Fast - ByteDance high quality I2V
+    # $0.025/sec, 720p, good for speaker videos
+    "seedance-1-pro-fast": ModelConfig(
+        name="seedance-1-pro-fast",
+        model_id="bytedance/seedance-1-pro-fast",
+        model_type=ModelType.IMAGE_TO_VIDEO,
+        default_params={
+            "fps": 24,
+            "duration": 6,
+            "resolution": "720p",
+            "aspect_ratio": "9:16",
+            "camera_fixed": True,
+        },
+        supports_start_frame=True,
+        supports_end_frame=False,
+        supports_audio=False,
+        cost_tier="standard",
+        description="Seedance 1 Pro Fast - high quality I2V, $0.025/sec, 720p"
+    ),
+    
+    # Nano Banana Pro - scene transformation with reference images
+    # Great for putting people into new scenes/environments
+    "nano-banana-pro": ModelConfig(
+        name="nano-banana-pro",
+        model_id="google/nano-banana-pro",
+        model_type=ModelType.TEXT_TO_IMAGE,
+        default_params={
+            "resolution": "1K",
+            "aspect_ratio": "9:16",
+            "output_format": "png",
+            "safety_filter_level": "block_only_high",
+        },
+        supports_start_frame=False,
+        supports_end_frame=False,
+        supports_audio=False,
+        cost_tier="standard",
+        description="Nano Banana Pro - scene transformation, puts reference person into new environments"
+    ),
 }
 
 # Default models for each task
 DEFAULT_VIDEO_MODEL = "wan-2.5-i2v"
-DEFAULT_IMAGE_MODEL = "flux-2-pro"
+DEFAULT_IMAGE_MODEL = "seedream-4.5"
 DEFAULT_MATTING_MODEL = "robust-video-matting"
 DEFAULT_TTS_MODEL = "speech-02-hd"
 
@@ -353,12 +468,13 @@ def generate_video(
             model=model,
         )
     
-    # Handle Wan T2V model
-    if model == "wan-2.5-t2v":
+    # Handle Wan T2V models (regular and fast)
+    if model in ("wan-2.5-t2v", "wan-2.5-t2v-fast"):
         return generate_video_wan_t2v(
             prompt=prompt,
             duration=duration,
             aspect_ratio=aspect_ratio,
+            model=model,
         )
     
     def call_replicate():
@@ -383,6 +499,8 @@ def generate_video_wan_t2v(
     prompt: str,
     duration: int = 5,
     aspect_ratio: str = "9:16",
+    model: str = "wan-2.5-t2v",
+    generate_audio: bool = True,  # Wan T2V always generates audio, param for API compat
 ) -> object:
     """
     Generate a video using Wan 2.5 T2V model (text-to-video with audio).
@@ -391,11 +509,13 @@ def generate_video_wan_t2v(
         prompt: Text description of the video
         duration: Video duration in seconds (5 or 10)
         aspect_ratio: Video aspect ratio (e.g., "9:16", "16:9", "1:1")
+        model: Model name ("wan-2.5-t2v" or "wan-2.5-t2v-fast")
+        generate_audio: Ignored - Wan T2V always generates audio
     
     Returns:
         Replicate output object
     """
-    model_config = get_model("wan-2.5-t2v")
+    model_config = get_model(model)
     
     # Clamp duration to valid values (5 or 10)
     duration = 5 if duration <= 7 else 10
@@ -508,6 +628,19 @@ def generate_video_with_image(
     """
     model_config = get_model(model)
     
+    # Clamp duration for Wan models (only supports 5s or 10s)
+    if model_config.name.startswith("wan"):
+        duration = 5 if duration <= 7 else 10
+    
+    # Clamp duration for Veo models (only supports 4, 6, or 8s)
+    if model_config.name.startswith("veo"):
+        if duration <= 5:
+            duration = 4
+        elif duration <= 7:
+            duration = 6
+        else:
+            duration = 8
+    
     if not model_config.supports_start_frame:
         raise ValueError(f"Model {model} does not support start frame input")
     
@@ -568,6 +701,8 @@ def generate_image(
     resolution: str = "1 MP",
     output_format: str = "webp",
     model: str = DEFAULT_IMAGE_MODEL,
+    reference_image: Optional[str] = None,
+    reference_images: Optional[list[str]] = None,
 ) -> object:
     """
     Generate an image from a text prompt.
@@ -578,6 +713,8 @@ def generate_image(
         resolution: Image resolution (for models that support it)
         output_format: Output format (webp, png, jpg)
         model: Model name from registry
+        reference_image: Optional single reference image URL (legacy)
+        reference_images: Optional list of reference image paths/URLs (max 4)
     
     Returns:
         Replicate output object
@@ -585,8 +722,54 @@ def generate_image(
     model_config = get_model(model)
     
     def call_replicate():
+        # Nano Banana Pro - scene transformation with reference person
+        if model == "nano-banana-pro":
+            input_data = {
+                **model_config.default_params,
+                "prompt": prompt,
+                "aspect_ratio": aspect_ratio,
+            }
+            # Add reference images (person to put into scene)
+            refs = []
+            if reference_images:
+                for ref in reference_images[:4]:
+                    if isinstance(ref, str) and ref.startswith(('http://', 'https://', 'data:')):
+                        refs.append(ref)
+                    else:
+                        refs.append(_prepare_file_input(ref))
+            elif reference_image:
+                if isinstance(reference_image, str) and reference_image.startswith(('http://', 'https://', 'data:')):
+                    refs.append(reference_image)
+                else:
+                    refs.append(_prepare_file_input(reference_image))
+            if refs:
+                input_data["image_input"] = refs
+                print(f"   Using {len(refs)} reference image(s) for scene transformation")
+        # Seedream 4.5 uses different parameters and supports reference images
+        elif model == "seedream-4.5":
+            input_data = {
+                **model_config.default_params,
+                "prompt": prompt,
+                "aspect_ratio": aspect_ratio,
+            }
+            # Add reference images if provided (max 4)
+            refs = []
+            if reference_images:
+                for ref in reference_images[:4]:
+                    if isinstance(ref, str) and ref.startswith(('http://', 'https://', 'data:')):
+                        refs.append(ref)
+                    else:
+                        refs.append(_prepare_file_input(ref))
+            elif reference_image:
+                if isinstance(reference_image, str) and reference_image.startswith(('http://', 'https://', 'data:')):
+                    refs.append(reference_image)
+                else:
+                    refs.append(_prepare_file_input(reference_image))
+            if refs:
+                input_data["image_input"] = refs
+                print(f"   Using {len(refs)} reference image(s)")
         # Z-Image Turbo uses width/height instead of aspect_ratio
-        if model == "z-image-turbo":
+        elif model == "z-image-turbo":
             # Convert aspect ratio to width/height
             size_map = {
                 "9:16": (768, 1344),
@@ -600,6 +783,30 @@ def generate_image(
                 "width": width,
                 "height": height,
             }
+        # Flux 2 Pro uses input_images for reference images
+        elif model == "flux-2-pro":
+            input_data = {
+                **model_config.default_params,
+                "prompt": prompt,
+                "aspect_ratio": aspect_ratio,
+                "output_format": output_format,
+            }
+            # Add reference images if provided
+            refs = []
+            if reference_images:
+                for ref in reference_images[:4]:
+                    if isinstance(ref, str) and ref.startswith(('http://', 'https://', 'data:')):
+                        refs.append(ref)
+                    else:
+                        refs.append(_prepare_file_input(ref))
+            elif reference_image:
+                if isinstance(reference_image, str) and reference_image.startswith(('http://', 'https://', 'data:')):
+                    refs.append(reference_image)
+                else:
+                    refs.append(_prepare_file_input(reference_image))
+            if refs:
+                input_data["input_images"] = refs
+                print(f"   Using {len(refs)} reference image(s)")
         else:
             input_data = {
                 **model_config.default_params,
@@ -613,6 +820,8 @@ def generate_image(
             
         print(f"🖼️ Generating image with {model_config.name}")
         print(f"   Prompt: {prompt[:100]}...")
+        if reference_image:
+            print(f"   Reference: {reference_image}")
         return client.run(model_config.model_id, input=input_data)
     
     return retry_replicate_call(call_replicate)
@@ -665,6 +874,66 @@ def remove_background(
 
 
 # =============================================================================
+# Video Captioning
+# =============================================================================
+
+DEFAULT_CAPTION_MODEL = "tiktok-captions"
+
+
+def add_captions(
+    input_video: Union[str, Path],
+    language: str = "auto",
+    highlight_color: str = "#FFFFFF",
+    caption_size: int = 100,
+    model: str = DEFAULT_CAPTION_MODEL,
+) -> object:
+    """
+    Add TikTok-style animated captions to a video.
+    
+    Args:
+        input_video: Path to input video OR URL
+        language: Language code or "auto" for auto-detection
+        highlight_color: Hex color for caption highlight (e.g., "#39E508" for green)
+        caption_size: Size of captions (default 100)
+        model: Model name from registry
+    
+    Returns:
+        Replicate output object with captioned video
+    """
+    model_config = get_model(model)
+    
+    def call_replicate():
+        # Handle video input - URL or file path
+        # For large video files, upload to Replicate's file hosting first to avoid timeouts
+        if isinstance(input_video, str) and input_video.startswith(('http://', 'https://')):
+            video_url = input_video
+        else:
+            # Upload file to Replicate's file hosting for large videos
+            video_path = Path(input_video)
+            file_size_mb = video_path.stat().st_size / (1024 * 1024)
+            print(f"   Uploading video ({file_size_mb:.1f} MB) to Replicate...")
+            
+            with open(video_path, "rb") as f:
+                file_output = replicate.files.create(f)
+            video_url = file_output.urls["get"]
+            print(f"   Upload complete: {video_url[:80]}...")
+        
+        input_data = {
+            **model_config.default_params,
+            "video": video_url,
+            "language": language,
+            "highlight_color": highlight_color,
+            "caption_size": caption_size,
+        }
+        
+        print(f"📝 Adding captions with {model_config.name}")
+        print(f"   Language: {language}, Color: {highlight_color}")
+        return client.run(model_config.model_id, input=input_data)
+    
+    return retry_replicate_call(call_replicate)
+
+
+# =============================================================================
 # Utility Functions
 # =============================================================================
 
@@ -673,7 +942,7 @@ def save_output(output, output_path: Union[str, Path]) -> Path:
     Save Replicate output to a file.
     
     Args:
-        output: Replicate output object
+        output: Replicate output object (single or array)
         output_path: Path to save the file
     
     Returns:
@@ -681,6 +950,12 @@ def save_output(output, output_path: Union[str, Path]) -> Path:
     """
     output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
+    
+    # Handle array outputs (like seedream) by taking first item
+    if isinstance(output, (list, tuple)):
+        if len(output) == 0:
+            raise ValueError("Output array is empty")
+        output = output[0]
     
     with open(output_path, "wb") as f:
         f.write(output.read())

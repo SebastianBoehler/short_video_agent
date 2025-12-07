@@ -1,0 +1,277 @@
+# =============================================================================
+# Fitness Transformation Story
+# =============================================================================
+# Personal journey narrative showing transformation with varied scene types
+# Niche: Fitness / Personal Development
+# Language: English
+# Features: 8 scenes, mixed formats, emotional storytelling arc
+#
+# SCENE TYPES:
+#   - speaker: Person talking with background overlay
+#   - speaker_in_scene: Transform speaker into gym/outdoor setting (nano-banana-pro)
+#   - broll: Pure workout/action scenes without speaker
+# =============================================================================
+
+title: "90 Day Transformation Journey"
+aspect_ratio: "9:16"
+resolution: "720p"
+
+# Model configuration - using fast models for cost efficiency
+speaker_model: veo-3.1-fast # For speaker videos (has audio)
+video_model: wan-2.5-i2v-fast # For background I2V animation
+image_model: flux-2-pro # For background images
+
+# Caption configuration - TikTok-style animated captions
+caption_final_video: true # Add captions to final stitched video
+caption_color: "#F97316" # Orange for energy/motivation
+caption_language: en # English
+
+scenes:
+  # Scene 1: Before hook - establishing the starting point
+  # Duration: 5s = 11-15 words
+  # Type: Speaker with static image background
+  - id: "before_hook"
+    type: "speaker"
+    duration_s: 5
+
+    script: "Three months ago I couldn't climb stairs. This was me."
+    # 10 words ^
+
+    video_prompt: >
+      Woman in her late 20s with tired expression looking down,
+      wearing oversized grey hoodie, sitting posture,
+      green screen background, soft indoor lighting,
+      vulnerable and honest expression,
+      mouth movements synchronized with English speech,
+      speaking style vulnerable and reflective, quiet honesty
+
+    speaker_image: "speakers/female3.png"
+
+    overlay_scale: 0.40
+    overlay_position: "bottom_left"
+
+    # Static image background for cost efficiency
+    background_prompt: >
+      Cozy living room with worn grey couch,
+      empty pizza box on coffee table, fitness magazines scattered,
+      TV remote and phone on cushion, dim afternoon light through blinds,
+      comfortable but stagnant atmosphere, before photo aesthetic,
+      vertical 9:16 format
+    background_type: image_to_video
+
+  # Scene 2: The struggle - B-roll showing difficulty
+  # Duration: 5s - Pure visual struggle scene
+  # Type: broll - no speaker, just action
+  - id: "struggle_montage"
+    type: "broll"
+    duration_s: 5
+
+    script: ""
+
+    video_prompt: >
+      Dramatic slow-motion shot of woman struggling to do pushups,
+      arms visibly shaking, sweat on forehead,
+      face showing effort and frustration,
+      collapsing onto blue yoga mat, breathing heavily,
+      5lb pink dumbbells visible nearby,
+      dim early morning light through window,
+      vertical 9:16 format, emotional struggle visualization
+
+    # Motivational background audio for broll
+    background_audio: "soft piano music, heavy breathing sounds, determination"
+
+  # Scene 3: The decision - turning point moment
+  # Uses nano-banana-pro to put speaker at sunrise location
+  - id: "turning_point"
+    type: "speaker_in_scene"
+    duration_s: 5
+
+    script: "That day I decided something had to change. No more excuses."
+
+    speaker_image: "speakers/female3.png"
+
+    # Scene transformation - puts speaker at sunrise
+    scene_prompt: >
+      Woman standing on rooftop at sunrise,
+      city skyline in background, golden hour light on face,
+      wearing workout clothes, determined expression,
+      wind slightly moving hair, inspirational atmosphere,
+      vertical 9:16 format
+    scene_model: nano-banana-pro
+    # Video animation prompt
+    video_prompt: >
+      Woman at sunrise looking at horizon then turning to camera,
+      determined expression, shoulders back with confidence,
+      mouth movements synchronized with English speech,
+      speaking style determined and resolute, turning point energy
+
+  # Scene 4: Angle change - continue sunrise scene from different angle
+  # Uses previous scene's last frame for natural multi-angle moment
+  - id: "turning_point_angle"
+    type: "speaker_angle_change"
+    duration_s: 5
+
+    script: "I wrote down my goal. Ninety days. No matter what."
+
+    speaker_image: "speakers/female3.png"
+
+    # Angle change - closer, more intimate shot
+    angle_prompt: >
+      camera rotated 25 degrees to the right,
+      closer framing on face and shoulders,
+      same rooftop sunrise setting, same golden light
+
+    scene_prompt: >
+      Woman on rooftop at sunrise,
+      city skyline behind, golden hour lighting,
+      workout clothes, determined expression
+
+    video_prompt: >
+      Woman looking directly at camera with conviction,
+      slight nod of determination, genuine emotion,
+      mouth movements synchronized with English speech,
+      speaking style intimate and honest, personal commitment
+
+  # Scene 5: First workout - B-roll action
+  # Duration: 5s - Pure workout scene
+  # Type: broll - energetic workout
+  - id: "first_workout"
+    type: "broll"
+    duration_s: 5
+
+    script: ""
+
+    video_prompt: >
+      Dynamic workout montage in bright modern gym,
+      woman doing jumping jacks with increasing confidence,
+      kettlebell swings with 15lb black kettlebell,
+      burpees on blue exercise mat,
+      sweat glistening on skin, muscles engaged,
+      large windows with morning light streaming in,
+      motivational poster "NO EXCUSES" visible on wall,
+      vertical 9:16 format
+
+    # Upbeat workout audio
+    background_audio: "upbeat electronic workout music, gym ambiance, determination"
+
+  # Scene 5: Progress - speaker with stats
+  # Duration: 5s = 11-15 words
+  # Type: Speaker with data visualization background
+  - id: "progress_update"
+    type: "speaker"
+    duration_s: 5
+
+    script: "Thirty days in. Down fifteen pounds. Three dress sizes smaller."
+
+    video_prompt: >
+      Woman smiling proudly at camera,
+      wearing fitted workout tank top showing progress,
+      hands gesturing naturally with excitement,
+      green screen background, bright natural lighting,
+      confident and happy expression,
+      mouth movements synchronized with English speech,
+      speaking style excited and proud, celebration energy
+
+    speaker_image: "speakers/female3.png"
+
+    overlay_scale: 0.35
+    overlay_position: "bottom_right"
+
+    background_prompt: >
+      Fitness progress tracking app interface on phone screen,
+      weight loss graph trending downward from 165 to 150 lbs,
+      green checkmark achievement badges unlocked,
+      "30 DAY STREAK" banner with fire emoji,
+      before/after silhouette comparison,
+      clean modern UI design with motivational colors,
+      vertical 9:16 format
+    background_type: image_to_video
+
+  # Scene 6: The hard part - emotional struggle
+  # Duration: 5s = 11-15 words
+  # Type: Speaker with static image background
+  - id: "plateau_struggle"
+    type: "speaker"
+    duration_s: 5
+
+    script: "Then I hit a wall. Two weeks with no progress. Almost quit."
+
+    video_prompt: >
+      Woman looking thoughtful and frustrated,
+      chin resting on hand, sitting posture,
+      green screen background, soft evening lighting,
+      showing vulnerability and doubt,
+      mouth movements synchronized with English speech,
+      speaking style vulnerable and honest, emotional struggle
+
+    speaker_image: "speakers/female3.png"
+
+    overlay_scale: 0.40
+    overlay_position: "bottom_left"
+
+    background_prompt: >
+      Kitchen table with glass meal prep containers,
+      open fitness journal with handwritten notes,
+      digital scale showing "152.0" (same as last week),
+      crumpled tissue nearby, half-eaten salad,
+      evening lamp light, frustration and doubt atmosphere,
+      vertical 9:16 format
+    background_type: image_to_video
+
+  # Scene 7: Breakthrough - speaker in gym setting
+  # Uses nano-banana-pro to put speaker in gym
+  - id: "breakthrough"
+    type: "speaker_in_scene"
+    duration_s: 5
+
+    script: "But I pushed through. Changed everything. The results just exploded."
+
+    speaker_image: "speakers/female3.png"
+
+    # Scene transformation - puts speaker in gym
+    scene_prompt: >
+      Fit woman in modern gym after intense workout,
+      wearing black sports bra and leggings,
+      sweat glistening, toned muscles visible,
+      weight rack and mirrors in background,
+      triumphant confident expression,
+      bright gym lighting, vertical 9:16 format
+    scene_model: nano-banana-pro
+    # Video animation prompt
+    video_prompt: >
+      Fit woman in gym celebrating with fist pump,
+      energetic triumphant expression,
+      mouth movements synchronized with English speech,
+      speaking style energetic and triumphant, breakthrough moment
+
+  # Scene 8: After reveal - transformation complete
+  # Duration: 5s = 11-15 words
+  # Type: Speaker with static image background
+  - id: "after_reveal"
+    type: "speaker"
+    duration_s: 5
+
+    script: "Ninety days later. I can run up stairs. This is my new life."
+
+    video_prompt: >
+      Fit woman standing confidently with hands on hips,
+      wearing fitted athletic wear showing transformation,
+      smiling brightly at camera,
+      green screen background, bright outdoor lighting,
+      proud confident expression,
+      mouth movements synchronized with English speech,
+      speaking style confident and proud, transformation complete
+
+    speaker_image: "speakers/female3.png"
+
+    overlay_scale: 0.35
+    overlay_position: "bottom_right"
+
+    background_prompt: >
+      Outdoor concrete staircase in park with sunlight,
+      woman silhouette running up stairs easily at top,
+      "90 DAYS" text overlay in corner,
+      before/after comparison split screen effect,
+      bright clear blue sky, success atmosphere,
+      vertical 9:16 format
+    background_type: video

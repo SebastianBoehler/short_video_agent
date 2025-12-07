@@ -1,0 +1,201 @@
+# =============================================================================
+# Fortnite Deathrun Challenge Map
+# =============================================================================
+# Gaming content creator promoting a custom Fortnite deathrun map
+# Niche: Gaming / Content Creator
+# Language: English
+# Features: Mix of speaker scenes and pure B-roll gameplay scenes
+#
+# SCENE TYPES:
+#   - speaker: Person talking with background overlay
+#   - speaker_in_scene: Transform speaker into environment (nano-banana-pro)
+#   - broll: Pure video without speaker overlay
+# =============================================================================
+
+title: "Fortnite Deathrun Challenge"
+aspect_ratio: "9:16"
+resolution: "720p"
+
+# Model configuration - using fast models for cost efficiency
+speaker_model: veo-3.1-fast # For speaker videos (has audio)
+video_model: wan-2.5-i2v-fast # For background I2V animation
+image_model: flux-2-pro # For background images
+
+# Caption configuration - TikTok-style animated captions
+caption_final_video: true # Add captions to final stitched video
+caption_color: "#A855F7" # Purple to match gaming aesthetic
+caption_language: en # English
+
+scenes:
+  # Scene 1: Hook - dramatic challenge intro
+  # Duration: 5s = 11-15 words recommended
+  # Type: Speaker with gaming background
+  - id: "hook"
+    type: "speaker"
+    duration_s: 5
+
+    script: "This Fortnite map has a one percent completion rate. I'm trying it."
+    # 11 words ^
+
+    # IMPORTANT: Describe speaker independently - no "same person" references
+    # Include specific visual details: age, clothing, expression, setting
+    video_prompt: >
+      Gamer speaking directly to camera with intense competitive expression,
+      wearing black gaming headset and purple LED-lit hoodie, green screen
+      background for chroma key removal, dramatic purple and blue RGB lighting
+      on face, close-up shot from chest up, mouth movements clearly visible and
+      synchronized with English speech, competitive gaming energy and excitement,
+      vertical 9:16 format, energetic gaming content creator vibe,
+      clear articulate speech audio, no background noise
+
+    speaker_image: "speakers/female2.png"
+
+    overlay_scale: 0.35
+    overlay_position: "bottom_right"
+
+    # Background matches the THEME of the ad - Fortnite deathrun visuals
+    background_prompt: >
+      Fortnite creative mode deathrun obstacle course,
+      neon purple and cyan glowing hexagonal platforms floating in dark void,
+      deadly orange lava pits bubbling below, spinning silver blade obstacles,
+      impossible parkour jumps between platforms, checkpoint flags with numbers,
+      dramatic volumetric purple fog, epic gaming atmosphere,
+      camera slowly panning across the challenging level,
+      vertical 9:16 cinematic game footage
+    background_type: image_to_video
+
+  # Scene 2: Pure B-roll - showcase the map difficulty
+  # Duration: 5s - NO SPEAKER, just gameplay visuals
+  # Type: broll - demonstrates pipeline capability without speaker overlay
+  - id: "gameplay_showcase"
+    type: "broll"
+    duration_s: 5
+
+    # No script - this is pure visual scene
+    script: ""
+
+    # For broll, video_prompt describes the full scene (no speaker)
+    video_prompt: >
+      First-person Fortnite gameplay footage,
+      player character attempting impossible parkour jumps,
+      neon-lit purple and cyan floating platforms,
+      narrowly avoiding spinning silver blade traps,
+      falling into bubbling orange lava pit and respawning,
+      intense fast-paced deathrun gameplay,
+      checkpoint number 47 visible, health bar depleting,
+      dramatic camera angles, vertical 9:16 gaming content
+
+    # Audio prompt for background (gaming sounds)
+    background_audio: "epic orchestral gaming music, jump sound effects, blade whoosh sounds"
+
+  # Scene 3: Reaction - speaker reacting to difficulty
+  # Duration: 5s = 11-15 words recommended
+  - id: "reaction"
+    type: "speaker"
+    duration_s: 5
+
+    script: "Bro I've died fifty times! This creator is insane. Who made this map?"
+
+    video_prompt: >
+      Female gamer with frustrated but entertained expression,
+      throwing hands up in disbelief, laughing while speaking,
+      wearing black gaming headset and purple LED-lit hoodie,
+      green screen background, purple and blue RGB lighting on face,
+      animated gestures showing frustration,
+      mouth movements synchronized with English speech,
+      speaking style frustrated but amused, exasperated energy
+
+    speaker_image: "speakers/female2.png"
+
+    overlay_scale: 0.40
+    overlay_position: "bottom_left"
+
+    background_prompt: >
+      Fortnite death screen with large red "ELIMINATED" text,
+      player character ragdolling into orange lava pit,
+      death counter showing "x50" in corner,
+      neon purple deathrun platforms in background,
+      respawn timer counting down, game over aesthetic,
+      vertical 9:16 gaming content format
+    background_type: image_to_video
+
+  # Scene 4: Speaker in gaming setup - lifestyle shot
+  # Uses nano-banana-pro to transform speaker into gaming room
+  - id: "gaming_setup"
+    type: "speaker_in_scene"
+    duration_s: 5
+
+    script: "My setup for this challenge. RGB everything. Let's finish this!"
+
+    speaker_image: "speakers/female2.png"
+
+    # Scene transformation - puts speaker into gaming room
+    scene_prompt: >
+      Female gamer sitting at epic RGB gaming setup,
+      three curved monitors showing Fortnite deathrun map,
+      purple and cyan LED strips on walls, gaming chair,
+      headset around neck, energy drink can on desk,
+      neon lights reflecting on face, vertical 9:16 format
+    scene_model: nano-banana-pro
+    # Video animation prompt
+    video_prompt: >
+      Female gamer at RGB gaming setup looking at monitors then turning to camera,
+      excited expression, putting headset on,
+      mouth movements synchronized with English speech,
+      speaking style hyped and competitive, ready for action
+
+  # Scene 5: Angle change - continue gaming setup from different angle
+  # Uses previous scene's last frame for natural multi-angle conversation
+  - id: "gaming_setup_angle"
+    type: "speaker_angle_change"
+    duration_s: 5
+
+    script: "Okay final attempt. If I die again I'm uninstalling. Here we go!"
+
+    speaker_image: "speakers/female2.png"
+
+    # Angle change - closer shot, different perspective
+    angle_prompt: >
+      camera rotated 20 degrees to the left,
+      tighter framing on face and upper body,
+      same RGB gaming setup visible in background
+
+    scene_prompt: >
+      Female gamer at RGB gaming setup,
+      purple and cyan LED lighting, gaming monitors,
+      headset on, intense focused expression
+
+    video_prompt: >
+      Female gamer leaning forward intensely, hands on keyboard,
+      determined expression, quick glance at camera,
+      mouth movements synchronized with English speech,
+      speaking style intense and focused, final attempt energy
+
+  # Scene 6: CTA - island code reveal
+  # Duration: 5s = 11-15 words recommended
+  - id: "cta"
+    type: "speaker"
+    duration_s: 5
+
+    script: "Drop the island code in comments below if you can beat this challenge!"
+
+    video_prompt: >
+      Female gamer pointing directly at camera with challenging smirk,
+      competitive energy, wearing black gaming headset and purple LED-lit hoodie,
+      green screen background, purple and blue RGB lighting,
+      direct eye contact, mouth movements synchronized with English speech,
+      speaking style confident and challenging, call to action energy
+
+    speaker_image: "speakers/female2.png"
+
+    overlay_scale: 0.45
+    overlay_position: "bottom_right"
+
+    background_prompt: >
+      Fortnite island code display screen,
+      large glowing purple text showing "CODE: 1234-5678-9012",
+      neon gaming UI frame with subscribe button,
+      like and share icons animated,
+      purple and cyan color scheme, sparkle effects,
+      vertical 9:16 format
+    background_type: video
