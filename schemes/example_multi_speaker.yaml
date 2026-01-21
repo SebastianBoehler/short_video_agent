@@ -1,0 +1,155 @@
+# Example config with multi-image speaker support
+# ================================================
+#
+# This demonstrates the new modular architecture with:
+# - Speaker folders (multiple reference images per speaker)
+# - Product folders (multiple product images)
+# - Backend selection (replicate, local, hybrid)
+
+title: "Product Demo with Multi-Image Speakers"
+aspect_ratio: "9:16"
+resolution: "720p"
+
+# Backend configuration
+# - replicate: Use Replicate API for all generation (default)
+# - local: Use local LTX-2 model for video generation
+# - hybrid: Local for video, API for images
+backend: "replicate"
+
+# Global model defaults (can be overridden per scene)
+video_model: "wan-2.5-i2v"
+speaker_model: "veo-3.1-fast"
+image_model: "seedream-4.5" # Supports up to 4 reference images
+tts_model: "speech-02-hd"
+
+# Caption settings
+add_captions: false
+caption_final_video: true
+caption_color: "#FFFFFF"
+caption_language: "auto"
+
+# ============================================
+# SPEAKERS - Define speakers with image folders
+# ============================================
+# Each speaker can have a folder with multiple reference images
+# These are automatically loaded and passed to image generation models
+
+speakers:
+  - id: "host"
+    name: "Sarah"
+    image_dir: "speakers/sarah/" # Folder with multiple images
+    description: "Young woman, mid-20s, long brown hair, friendly smile"
+    voice_id: null # Will use default TTS voice
+    language: "en"
+
+  - id: "expert"
+    name: "Dr. Mike"
+    image_dir: "speakers/mike/"
+    description: "Middle-aged man, short gray hair, professional appearance"
+    language: "en"
+
+# ============================================
+# PRODUCTS - Define products with image folders
+# ============================================
+
+products:
+  - id: "serum"
+    name: "Glow Serum"
+    image_dir: "products/glow_serum/"
+    description: "Premium skincare serum in elegant glass bottle"
+
+# ============================================
+# SCENES
+# ============================================
+
+scenes:
+  # Scene 1: Host introduction (speaker_in_scene)
+  # Uses multiple speaker images for better consistency
+  - id: "intro"
+    type: "speaker_in_scene"
+    duration_s: 6
+
+    speaker_id: "host" # References speaker defined above
+
+    script: "Hey! Want to know the secret to amazing skin? Let me show you!"
+
+    scene_prompt: >
+      Young woman with long brown hair standing in a bright, modern bathroom,
+      soft natural lighting, clean aesthetic, holding a skincare product,
+      friendly expression, vertical 9:16 composition
+
+    video_prompt: >
+      Woman talking enthusiastically to camera, natural gestures,
+      warm smile, soft lighting, bathroom setting, vertical frame
+
+    # Use nano-banana-pro for scene transformation (supports multi-image)
+    scene_model: "nano-banana-pro"
+    speaker_model: "veo-3.1-fast"
+
+  # Scene 2: Product showcase (broll)
+  - id: "product_reveal"
+    type: "broll"
+    duration_s: 5
+
+    product_id: "serum" # References product defined above
+
+    video_prompt: >
+      Elegant glass serum bottle on marble surface,
+      soft natural lighting, slow camera push-in,
+      water droplets, luxury aesthetic, vertical 9:16
+
+    generate_video_audio: true
+    background_audio: "Soft ambient music, spa atmosphere"
+
+  # Scene 3: Speaker with angle change
+  # First scene establishes the speaker in environment
+  - id: "explanation"
+    type: "speaker_in_scene"
+    duration_s: 6
+
+    speaker_id: "host"
+    product_id: "serum" # Product images also used as references
+
+    script: "Two drops in the morning, two at night. That's it."
+
+    scene_prompt: >
+      Young woman with long brown hair in bathroom, applying serum,
+      close-up shot, soft lighting, product visible, vertical frame
+
+    video_prompt: >
+      Woman demonstrating product application, talking to camera,
+      natural movements, soft lighting, vertical frame
+
+  # Scene 4: Camera angle change (continues from previous)
+  - id: "angle_change"
+    type: "speaker_angle_change"
+    duration_s: 5
+
+    speaker_id: "host"
+
+    script: "Two weeks later, my skin is glowing!"
+
+    # Angle change prompt describes camera movement
+    angle_prompt: "camera rotated 25 degrees to the right, closer framing on face"
+
+    scene_prompt: >
+      Same bathroom setting, same person, different camera angle,
+      showing glowing skin, happy expression
+
+    video_prompt: >
+      Woman showing clear skin to camera, happy expression,
+      natural lighting, close-up, vertical frame
+
+  # Scene 5: Call to action
+  - id: "cta"
+    type: "broll"
+    duration_s: 4
+
+    product_id: "serum"
+
+    video_prompt: >
+      Product bottle with "Shop Now" text overlay aesthetic,
+      dynamic motion graphics style, brand colors,
+      urgency and excitement, vertical 9:16
+
+    generate_video_audio: true

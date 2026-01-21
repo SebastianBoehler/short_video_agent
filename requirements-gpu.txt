@@ -1,0 +1,18 @@
+# GPU dependencies for local model inference
+# These are separate to allow CPU-only builds
+
+# PyTorch with CUDA support
+torch>=2.1.0
+torchvision>=0.16.0
+
+# Diffusers for LTX-2
+diffusers>=0.32.0
+transformers>=4.45.0
+accelerate>=0.34.0
+sentencepiece
+
+# For fp8 optimization
+bitsandbytes>=0.43.0
+
+# Optional: xformers for memory efficiency
+# xformers>=0.0.23

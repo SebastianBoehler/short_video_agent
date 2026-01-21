@@ -1,0 +1,44 @@
+# Short Video Agent - CPU-only Docker image
+# Uses Replicate API for all model inference
+#
+# Build: docker build -f Dockerfile.cpu -t short-video-agent-cpu .
+# Run:   docker run -v $(pwd)/outputs:/app/outputs short-video-agent-cpu
+
+FROM python:3.11-slim
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    ffmpeg \
+    git \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create app directory
+WORKDIR /app
+
+# Copy requirements
+COPY requirements.txt .
+
+# Install Python dependencies (CPU only)
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt
+
+# Copy source code
+COPY src/ ./src/
+COPY schemes/ ./schemes/
+COPY speakers/ ./speakers/
+COPY products/ ./products/
+
+# Copy entry points
+COPY run.py .
+
+# Create output directory
+RUN mkdir -p outputs
+
+# Environment variables
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app
+
+# Default command
+ENTRYPOINT ["python", "run.py"]
+CMD ["--help"]

@@ -1,0 +1,48 @@
+# Docker Compose for Short Video Agent
+# 
+# Usage:
+#   docker-compose up video-agent  # Run with Replicate API
+#   docker-compose up video-agent-gpu  # Run with local LTX-2 model
+
+version: '3.8'
+
+services:
+  # CPU-only service (uses Replicate API)
+  video-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile.cpu
+    volumes:
+      - ./outputs:/app/outputs
+      - ./schemes:/app/schemes
+      - ./speakers:/app/speakers
+      - ./products:/app/products
+    environment:
+      - REPLICATE_API_TOKEN=${REPLICATE_API_TOKEN}
+    command: ["--config", "schemes/example.yaml", "--backend", "replicate"]
+
+  # GPU service (uses local LTX-2 model)
+  video-agent-gpu:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./outputs:/app/outputs
+      - ./schemes:/app/schemes
+      - ./speakers:/app/speakers
+      - ./products:/app/products
+      - huggingface-cache:/root/.cache/huggingface
+    environment:
+      - REPLICATE_API_TOKEN=${REPLICATE_API_TOKEN}
+      - HF_HOME=/root/.cache/huggingface
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    command: ["--config", "schemes/example.yaml", "--backend", "local"]
+
+volumes:
+  huggingface-cache:

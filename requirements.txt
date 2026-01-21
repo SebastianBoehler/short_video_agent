@@ -1,13 +1,12 @@
-replicate
-python-dotenv
-moviepy
-requests
-pyyaml
-opencv-python
+# Core dependencies
+replicate>=0.25.0
+python-dotenv>=1.0.0
+requests>=2.31.0
+pyyaml>=6.0.0
 
-# LTX-Video (self-hosted) - uncomment for GPU deployment
-diffusers>=0.32.0
-transformers>=4.45.0
-accelerate>=0.34.0
-torch>=2.1.0
-sentencepiece  # For T5 tokenizer
+# Video processing
+moviepy>=1.0.3
+opencv-python>=4.8.0
+
+# Note: GPU dependencies are in requirements-gpu.txt
+# Install with: pip install -r requirements-gpu.txt
